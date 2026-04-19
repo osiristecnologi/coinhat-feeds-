@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,15 +13,13 @@ body{
  color:#111;
 }
 
-/* HEADER CLEAN */
 header{
  display:flex;
  justify-content:space-between;
  align-items:center;
  padding:12px;
- background:#ffffff;
+ background:#fff;
  border-bottom:2px solid #00c2ff;
- box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
 
 .icon{
@@ -30,14 +28,14 @@ header{
  color:#00aaff;
 }
 
-/* SIDEBAR */
+/* MENU */
 .sidebar{
  position:fixed;
  left:-320px;
  top:0;
  width:300px;
  height:100%;
- background:#ffffff;
+ background:#fff;
  padding:15px;
  transition:0.3s;
  overflow-y:auto;
@@ -49,13 +47,13 @@ header{
  cursor:pointer;
  font-size:18px;
  color:#00aaff;
- display:block;
  margin-bottom:10px;
+ display:block;
 }
 
 /* NEWS */
 .news{
- background:#f0f8ff;
+ background:#eef7ff;
  margin:8px 0;
  padding:10px;
  border-left:4px solid #00c2ff;
@@ -63,7 +61,7 @@ header{
  font-size:13px;
 }
 
-/* CARDS */
+/* GRID */
 .panel{
  display:flex;
  flex-wrap:wrap;
@@ -71,16 +69,15 @@ header{
 }
 
 .card{
- background:#ffffff;
+ background:#fff;
  margin:10px;
  padding:12px;
  border-radius:12px;
  width:220px;
  border:1px solid #d0eaff;
- box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* TITLES */
+/* TITLE */
 .title{
  margin:15px;
  color:#00aaff;
@@ -102,8 +99,8 @@ header{
 .lang button{
  display:block;
  margin:5px 0;
- background:none;
  border:1px solid #00c2ff;
+ background:none;
  color:#00aaff;
  cursor:pointer;
 }
@@ -118,14 +115,11 @@ canvas{
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- MENU -->
 <div class="sidebar" id="sidebar">
-
- <span class="closeBtn" onclick="toggleMenu()">← Close</span>
-
- <h3>📰 News</h3>
- <div id="newsBox">Loading...</div>
-
+ <span class="closeBtn" onclick="toggleMenu()">← Fechar</span>
+ <h3>📰 Notícias</h3>
+ <div id="newsBox">Carregando...</div>
 </div>
 
 <!-- HEADER -->
@@ -137,81 +131,85 @@ canvas{
 
 <!-- LANG -->
 <div class="lang" id="langBox">
- <button onclick="setLang('en')">EN</button>
  <button onclick="setLang('pt')">PT</button>
+ <button onclick="setLang('en')">EN</button>
  <button onclick="setLang('es')">ES</button>
  <button onclick="setLang('zh')">ZH</button>
  <button onclick="setLang('ja')">JA</button>
  <button onclick="setLang('ar')">AR</button>
 </div>
 
-<!-- MEMECOINS MAIN -->
-<div class="title">🚀 Trending Memecoins</div>
+<!-- MEMES -->
+<div class="title" id="title">🚀 Memecoins em Alta</div>
 <div class="panel" id="memes"></div>
 
 <script>
 
-let lang="en";
+let lang="pt";
 
-// ================= MENU =================
+// MENU
 function toggleMenu(){
  document.getElementById("sidebar").classList.toggle("open");
 }
 
-// ================= LANG =================
+// LANG
 function toggleLang(){
  let b=document.getElementById("langBox");
- b.style.display = b.style.display==="block"?"none":"block";
+ b.style.display=b.style.display==="block"?"none":"block";
 }
 
 const t={
- en:"Trending Memecoins",
- pt:"Memecoins em Alta",
- es:"Memecoins Tendencia",
- zh:"热门迷因币",
- ja:"ミームコイン",
- ar:"ميمكوين"
+ pt:"🚀 Memecoins em Alta",
+ en:"🚀 Trending Memecoins",
+ es:"🚀 Memecoins Tendencia",
+ zh:"🚀 热门迷因币",
+ ja:"🚀 ミームコイン",
+ ar:"🚀 ميمكوين"
 };
 
 function setLang(l){
  lang=l;
- document.querySelector(".title").innerText=t[l];
+ document.getElementById("title").innerText=t[l];
 }
 
-// ================= NEWS =================
+// ================= NEWS REAL (RSS SEM API KEY) =================
 async function loadNews(){
+
  const box=document.getElementById("newsBox");
 
  try{
-  const res=await fetch("https://api.coingecko.com/api/v3/status_updates");
+  const res=await fetch(
+  "https://api.allorigins.win/get?url=https://www.coindesk.com/arc/outboundfeeds/rss/"
+  );
   const data=await res.json();
 
-  const news=(data.status_updates||[]).slice(0,3);
+  const parser=new DOMParser();
+  const xml=parser.parseFromString(data.contents,"text/xml");
+
+  const items=[...xml.querySelectorAll("item")].slice(0,3);
 
   box.innerHTML="";
 
-  if(news.length===0){
-   box.innerHTML="No news found";
-   return;
-  }
+  items.forEach(i=>{
+   const title=i.querySelector("title").textContent;
+   const link=i.querySelector("link").textContent;
 
-  news.forEach(n=>{
    box.innerHTML+=`
    <div class="news">
-    📰 ${n.description.slice(0,120)}...
+    📰 <a href="${link}" target="_blank">${title}</a>
    </div>`;
   });
 
  }catch(e){
-  box.innerHTML="News error";
+  box.innerHTML="Erro ao carregar notícias";
  }
 }
 
-// ================= MEMECOINS + CHART =================
+// ================= MEMECOINS + PREÇO + GRÁFICO =================
 async function loadMemes(){
 
  const box=document.getElementById("memes");
- box.innerHTML="Loading...";
+ box.innerHTML="Carregando...";
 
  const res=await fetch("https://api.coingecko.com/api/v3/search/trending");
  const data=await res.json();
@@ -249,7 +247,7 @@ async function loadMemes(){
  }
 }
 
-// ================= SIMPLE CHART =================
+// CHART
 function draw(id,data){
  const c=document.getElementById(id);
  if(!c) return;
@@ -275,8 +273,8 @@ function draw(id,data){
 }
 
 // INIT
-loadMemes();
 loadNews();
+loadMemes();
 
 </script>
 
