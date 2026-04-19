@@ -21,11 +21,9 @@
         justify-content: space-between;
         align-items: center;
         padding: 20px 30px;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.7);
         border-bottom: 4px solid #ff00ff;
         box-shadow: 0 0 20px #ff00ff;
-        flex-wrap: wrap;
-        gap: 15px;
     }
 
     .logo {
@@ -37,46 +35,20 @@
         gap: 10px;
     }
 
-    .search-container {
-        flex: 1;
-        max-width: 500px;
-        position: relative;
-    }
-
-    .search-box {
-        width: 100%;
-        padding: 15px 20px 15px 55px;
-        font-size: 18px;
-        background: #1a0033;
-        border: 3px solid #00ffff;
-        border-radius: 50px;
-        color: white;
-        outline: none;
-        box-shadow: 0 0 20px #00ffff;
-    }
-
-    .search-box:focus {
-        box-shadow: 0 0 30px #ffff00;
-    }
-
-    .lupa {
-        position: absolute;
-        left: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 24px;
-        color: #ffff00;
-    }
-
     .lang-btn {
         font-size: 32px;
         cursor: pointer;
         transition: transform 0.3s;
     }
 
-    .lang-btn:hover { transform: rotate(20deg) scale(1.2); }
+    .lang-btn:hover {
+        transform: rotate(20deg) scale(1.2);
+    }
 
-    .container { display: flex; flex-wrap: wrap; }
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+    }
 
     .feed {
         flex: 3;
@@ -99,6 +71,21 @@
     .coin:hover {
         transform: scale(1.05) rotate(2deg);
         box-shadow: 0 0 40px #ffff00, 0 0 60px #ff00ff;
+    }
+
+    .coin::before {
+        content: '🐸';
+        position: absolute;
+        top: -10px;
+        right: 15px;
+        font-size: 60px;
+        opacity: 0.15;
+        transition: all 0.4s;
+    }
+
+    .coin:hover::before {
+        transform: rotate(360deg) scale(1.3);
+        opacity: 0.3;
     }
 
     .coin strong {
@@ -129,33 +116,6 @@
         50% { transform: scale(1.08); }
     }
 
-    .search-results {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: #1a0033;
-        border: 3px solid #00ffff;
-        border-top: none;
-        border-radius: 0 0 20px 20px;
-        max-height: 400px;
-        overflow-y: auto;
-        z-index: 100;
-        box-shadow: 0 10px 30px rgba(0,255,255,0.5);
-        display: none;
-    }
-
-    .search-item {
-        padding: 12px 20px;
-        cursor: pointer;
-        border-bottom: 1px solid #00ffff33;
-    }
-
-    .search-item:hover {
-        background: #ff00ff;
-        color: black;
-    }
-
     .ads {
         flex: 1;
         background: rgba(10, 5, 30, 0.95);
@@ -178,6 +138,7 @@
 
     .adbox:hover {
         transform: translateY(-8px) scale(1.03);
+        box-shadow: 0 0 35px #ffff00;
     }
 
     h2, h3 {
@@ -189,7 +150,7 @@
 
     .lang-menu {
         position: absolute;
-        top: 90px;
+        top: 80px;
         right: 30px;
         background: #1a0033;
         padding: 15px;
@@ -197,7 +158,7 @@
         border: 3px solid #00ffff;
         box-shadow: 0 0 30px #ff00ff;
         display: none;
-        z-index: 200;
+        z-index: 100;
     }
 
     .lang-menu div {
@@ -210,6 +171,7 @@
     .lang-menu div:hover {
         background: #ff00ff;
         color: black;
+        transform: scale(1.1);
     }
 </style>
 </head>
@@ -218,13 +180,6 @@
 
 <header>
     <div class="logo">🤠 CoinHat Feeds <span style="font-size:18px;">🚀 TO THE MOON</span></div>
-    
-    <div class="search-container">
-        <span class="lupa">🔎</span>
-        <input type="text" id="searchInput" class="search-box" placeholder="Busque nome, símbolo ou contrato... (ex: pepe, doge, 0x...)">
-        <div class="search-results" id="searchResults"></div>
-    </div>
-
     <div class="lang-btn" onclick="toggleLang()">🌍</div>
 </header>
 
@@ -235,3 +190,94 @@
     <div onclick="setLang('es')">🇪🇸 Español</div>
     <div onclick="setLang('jp')">🇯🇵 日本語</div>
     <div onclick="setLang('ru')">🇷🇺 Русский</div>
+    <div onclick="setLang('ar')">🇸🇦 العربية</div>
+</div>
+
+<div class="container">
+
+    <div class="feed">
+        <h2 id="title">🚀 MERCADO MEME 🔥</h2>
+        <div id="coins"></div>
+    </div>
+
+    <div class="ads">
+        <h3 id="adsTitle">🔥 ANÚNCIOS QUENTES 🔥</h3>
+
+        <div class="adbox">🐶 Quer listar sua memecoin? Manda DM no X! TO THE MOON</div>
+        <div class="adbox">🟢 Publicidade aqui = +1000% hype garantido (ou seu dinheiro de volta kkk)</div>
+        <div class="adbox">🤠 CoinHat Ads Network - Onde as memecoins viram lendas</div>
+    </div>
+
+</div>
+
+<script>
+const texts = {
+    pt: { title: "🚀 MERCADO MEME 🔥", ads: "🔥 ANÚNCIOS QUENTES 🔥" },
+    en: { title: "🚀 MEME MARKET 🔥", ads: "🔥 HOT ADS 🔥" },
+    zh: { title: "🚀 迷因市场 🔥", ads: "🔥 热门广告 🔥" },
+    es: { title: "🚀 MERCADO MEME 🔥", ads: "🔥 ANUNCIOS CALIENTES 🔥" },
+    jp: { title: "🚀 ミーム市場 🔥", ads: "🔥 ホット広告 🔥" },
+    ru: { title: "🚀 МЕМ-РЫНОК 🔥", ads: "🔥 ГОРЯЧИЕ ОБЪЯВЛЕНИЯ 🔥" },
+    ar: { title: "🚀 سوق الميمز 🔥", ads: "🔥 إعلانات ساخنة 🔥" }
+};
+
+let currentLang = "pt";
+
+function setLang(lang) {
+    currentLang = lang;
+    document.getElementById("title").innerText = texts[lang].title;
+    document.getElementById("adsTitle").innerText = texts[lang].ads;
+    toggleLang();
+}
+
+function toggleLang() {
+    const menu = document.getElementById("langMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+async function loadCoins() {
+    const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,dogecoin,shiba-inu,pepe,ethereum&vs_currencies=usd&include_24hr_change=true";
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const container = document.getElementById("coins");
+        container.innerHTML = "";
+
+        const emojis = {
+            bitcoin: "₿",
+            dogecoin: "🐶",
+            "shiba-inu": "🐕",
+            pepe: "🐸",
+            ethereum: "⧫"
+        };
+
+        for (let id in data) {
+            let coin = data[id];
+            let price = coin.usd.toLocaleString('en-US', {minimumFractionDigits: id === 'bitcoin' || id === 'ethereum' ? 2 : 8});
+            let change = coin.usd_24h_change.toFixed(2);
+            let symbol = emojis[id] || "🪙";
+
+            container.innerHTML += `
+                <div class="coin">
+                    <strong>${symbol} ${id.toUpperCase().replace('-', ' ')}</strong><br>
+                    <span class="price">$${price}</span><br>
+                    <span class="${change >= 0 ? "up" : "down"}">
+                        24h: ${change >= 0 ? '▲' : '▼'} ${change}%
+                    </span>
+                </div>
+            `;
+        }
+    } catch(e) {
+        console.error("Erro ao carregar preços:", e);
+        document.getElementById("coins").innerHTML = `<div class="coin" style="text-align:center;color:#ffff00;">🌐 API do CoinGecko tá de brincadeira... tente novamente!</div>`;
+    }
+}
+
+loadCoins();
+setInterval(loadCoins, 12000); // atualiza a cada 12 segundos (mais suave)
+</script>
+
+</body>
+</html>
