@@ -1,15 +1,19 @@
 <script>
 
+document.addEventListener("DOMContentLoaded", () => {
+
 // ================= MENU =================
 function toggleMenu(){
  document.getElementById("sidebar").classList.toggle("open");
 }
+window.toggleMenu = toggleMenu;
 
 // ================= LANG =================
 function toggleLang(){
  let b=document.getElementById("langBox");
  b.style.display = b.style.display==="block"?"none":"block";
 }
+window.toggleLang = toggleLang;
 
 const t={
  pt:{title:"🚀 Memecoins em Alta",news:"📰 Notícias"},
@@ -23,12 +27,14 @@ const t={
 function setLang(l){
  document.getElementById("title").innerText = t[l].title;
  document.getElementById("newsTitle").innerText = t[l].news;
-
  document.getElementById("langBox").style.display = "none";
 }
+window.setLang = setLang;
 
-// ================= SEARCH (ENTER KEY) =================
-document.getElementById("search").addEventListener("keypress", async (e)=>{
+// ================= SEARCH =================
+const searchInput = document.getElementById("search");
+
+searchInput.addEventListener("keydown", async (e)=>{
  if(e.key !== "Enter") return;
 
  let q=e.target.value.trim();
@@ -51,12 +57,11 @@ document.getElementById("search").addEventListener("keypress", async (e)=>{
     <h3>${p.baseToken.symbol}</h3>
     <p>$${p.priceUsd || "?"}</p>
     <p>${p.baseToken.name}</p>
-   </div>
-  `;
+   </div>`;
  });
 });
 
-// ================= MEMECOINS =================
+// ================= MEMES =================
 async function loadMemes(){
 
  const box=document.getElementById("memes");
@@ -65,23 +70,17 @@ async function loadMemes(){
  const res=await fetch("https://api.coingecko.com/api/v3/search/trending");
  const data=await res.json();
 
- const coins=data.coins.slice(0,8);
+ const ids = data.coins.slice(0,8).map(c=>c.item.id).join(",");
+
+ const r = await fetch(
+ `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&sparkline=true`
+ );
+
+ const coins = await r.json();
 
  box.innerHTML="";
 
- for(let i of coins){
-
-  let id=i.item.id;
-
-  let r=await fetch(
-  `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${id}&sparkline=true`
-  );
-
-  let d=await r.json();
-  let c=d[0];
-
-  if(!c) continue;
-
+ coins.forEach(c=>{
   box.innerHTML+=`
   <div class="card">
    <h3>${c.symbol.toUpperCase()}</h3>
@@ -91,8 +90,8 @@ async function loadMemes(){
 
   setTimeout(()=>{
    draw(`c-${c.id}`,c.sparkline_in_7d.price);
-  },100);
- }
+  },50);
+ });
 }
 
 // ================= CHART =================
@@ -122,5 +121,7 @@ function draw(id,data){
 
 // INIT
 loadMemes();
+
+});
 
 </script>
