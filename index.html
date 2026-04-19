@@ -1,196 +1,161 @@
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
 
+// ================= SAFE GET =================
+function el(id){
+ return document.getElementById(id);
+}
+
 // ================= MENU =================
-function toggleMenu(){
- document.getElementById("sidebar").classList.toggle("open");
-}
-window.toggleMenu = toggleMenu;
+window.toggleMenu = () => {
+ el("sidebar")?.classList.toggle("open");
+};
 
-// ================= LANG BOX =================
-function toggleLang(){
- let b=document.getElementById("langBox");
- b.style.display = b.style.display==="block"?"none":"block";
-}
-window.toggleLang = toggleLang;
+// ================= LANG =================
+window.toggleLang = () => {
+ let b = el("langBox");
+ if(b) b.style.display = b.style.display==="block"?"none":"block";
+};
 
-// ================= TRADUÇÕES COMPLETAS =================
+// ================= TRADUÇÕES =================
 const translations = {
-
  pt:{
   title:"🚀 Memecoins em Alta",
   news:"📰 Notícias",
   search:"Buscar contrato...",
   newsList:[
-   "📰 Bitcoin dispara com adoção institucional",
-   "📰 Ethereum reduz taxas e atrai usuários",
-   "📰 Memecoins da Solana voltam a crescer"
+   "📰 Bitcoin dispara",
+   "📰 Ethereum reduz taxas",
+   "📰 Memecoins da Solana sobem"
   ]
  },
-
  en:{
   title:"🚀 Trending Memecoins",
   news:"📰 News",
   search:"Search contract...",
   newsList:[
-   "📰 Bitcoin surges with institutional adoption",
-   "📰 Ethereum reduces fees and gains users",
-   "📰 Solana memecoins are pumping again"
-  ]
- },
-
- es:{
-  title:"🚀 Memecoins en tendencia",
-  news:"📰 Noticias",
-  search:"Buscar contrato...",
-  newsList:[
-   "📰 Bitcoin sube con adopción institucional",
-   "📰 Ethereum reduce tarifas",
-   "📰 Memecoins vuelven a subir"
-  ]
- },
-
- zh:{
-  title:"🚀 热门迷因币",
-  news:"📰 新闻",
-  search:"搜索合约...",
-  newsList:[
-   "📰 比特币上涨",
-   "📰 以太坊降低费用",
-   "📰 迷因币再次上涨"
-  ]
- },
-
- ja:{
-  title:"🚀 ミームコイン",
-  news:"📰 ニュース",
-  search:"コントラクト検索...",
-  newsList:[
-   "📰 ビットコイン上昇",
-   "📰 イーサリアム手数料低下",
-   "📰 ミームコイン上昇"
-  ]
- },
-
- ar:{
-  title:"🚀 ميمكوين",
-  news:"📰 أخبار",
-  search:"بحث العقد...",
-  newsList:[
-   "📰 ارتفاع بيتكوين",
-   "📰 انخفاض رسوم إيثريوم",
-   "📰 عودة الميمكوين"
+   "📰 Bitcoin surges",
+   "📰 Ethereum fees drop",
+   "📰 Memecoins pumping"
   ]
  }
-
 };
 
-// ================= APLICAR IDIOMA =================
-function setLang(lang){
-
+// ================= SET LANG =================
+window.setLang = (lang)=>{
  const t = translations[lang];
+ if(!t) return;
 
- document.getElementById("title").innerText = t.title;
- document.getElementById("newsTitle").innerText = t.news;
- document.getElementById("search").placeholder = t.search;
+ if(el("title")) el("title").innerText = t.title;
+ if(el("newsTitle")) el("newsTitle").innerText = t.news;
+ if(el("search")) el("search").placeholder = t.search;
 
- // atualizar notícias
- const newsCards = document.querySelectorAll(".news-card");
-
- newsCards.forEach((card, i)=>{
-  if(t.newsList[i]){
-   card.innerText = t.newsList[i];
-  }
+ document.querySelectorAll(".news-card").forEach((card,i)=>{
+  if(t.newsList[i]) card.innerText = t.newsList[i];
  });
 
- document.getElementById("langBox").style.display = "none";
-}
-window.setLang = setLang;
+ if(el("langBox")) el("langBox").style.display="none";
+};
 
 // ================= SEARCH =================
-const searchInput = document.getElementById("search");
+let searchInput = el("search");
 
-searchInput.addEventListener("keydown", async (e)=>{
- if(e.key !== "Enter") return;
+if(searchInput){
+ searchInput.addEventListener("keydown", async (e)=>{
+  if(e.key !== "Enter") return;
 
- let q=e.target.value.trim();
- if(!q) return;
+  let q=e.target.value.trim();
+  if(!q) return;
 
- const res=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${q}`);
- const data=await res.json();
+  try{
+   const res=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${q}`);
+   const data=await res.json();
 
- const box=document.getElementById("memes");
- box.innerHTML="";
+   const box=el("memes");
+   if(!box) return;
 
- if(!data.pairs){
-  box.innerHTML="Token não encontrado";
-  return;
- }
+   box.innerHTML="";
 
- data.pairs.slice(0,5).forEach(p=>{
-  box.innerHTML+=`
-   <div class="card">
-    <h3>${p.baseToken.symbol}</h3>
-    <p>$${p.priceUsd || "?"}</p>
-    <p>${p.baseToken.name}</p>
-   </div>
-  `;
+   if(!data.pairs){
+    box.innerHTML="Token não encontrado";
+    return;
+   }
+
+   data.pairs.slice(0,5).forEach(p=>{
+    box.innerHTML+=`
+     <div class="card">
+      <h3>${p.baseToken.symbol}</h3>
+      <p>$${p.priceUsd || "?"}</p>
+      <p>${p.baseToken.name}</p>
+     </div>
+    `;
+   });
+
+  }catch(err){
+   console.log(err);
+   el("memes").innerHTML="Erro na busca";
+  }
  });
-});
+}
 
-// ================= MEMECOINS =================
+// ================= LOAD MEMES =================
 async function loadMemes(){
+ const box=el("memes");
+ if(!box) return;
 
- const box=document.getElementById("memes");
  box.innerHTML="Carregando...";
 
- const res=await fetch("https://api.coingecko.com/api/v3/search/trending");
- const data=await res.json();
+ try{
+  const res=await fetch("https://api.coingecko.com/api/v3/search/trending");
+  const data=await res.json();
 
- const ids = data.coins.slice(0,8).map(c=>c.item.id).join(",");
+  const ids = data.coins.slice(0,8).map(c=>c.item.id).join(",");
 
- const r = await fetch(
- `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&sparkline=true`
- );
+  const r = await fetch(
+   `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&sparkline=true`
+  );
 
- const coins = await r.json();
+  const coins = await r.json();
 
- box.innerHTML="";
+  box.innerHTML="";
 
- coins.forEach(c=>{
-  box.innerHTML+=`
-  <div class="card">
-   <h3>${c.symbol.toUpperCase()}</h3>
-   <p>$${c.current_price}</p>
-   <canvas id="c-${c.id}"></canvas>
-  </div>`;
+  coins.forEach(c=>{
+   box.innerHTML+=`
+    <div class="card">
+     <h3>${c.symbol.toUpperCase()}</h3>
+     <p>$${c.current_price}</p>
+     <canvas id="c-${c.id}"></canvas>
+    </div>
+   `;
 
-  setTimeout(()=>{
-   draw(`c-${c.id}`,c.sparkline_in_7d.price);
-  },50);
- });
+   setTimeout(()=>{
+    draw(`c-${c.id}`,c.sparkline_in_7d.price);
+   },50);
+  });
+
+ }catch(e){
+  box.innerHTML="Erro ao carregar";
+ }
 }
 
 // ================= CHART =================
 function draw(id,data){
- const c=document.getElementById(id);
+ const c=el(id);
  if(!c) return;
 
  const ctx=c.getContext("2d");
  c.width=220;
  c.height=60;
 
- ctx.strokeStyle="#00aaff";
- ctx.beginPath();
-
  let min=Math.min(...data);
  let max=Math.max(...data);
+
+ ctx.strokeStyle="#00aaff";
+ ctx.beginPath();
 
  data.forEach((p,i)=>{
   let x=i*(220/data.length);
   let y=60-((p-min)/(max-min))*60;
-
   i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
  });
 
@@ -198,9 +163,8 @@ function draw(id,data){
 }
 
 // INIT
-setLang("pt"); // idioma inicial
+setLang("pt");
 loadMemes();
 
 });
-
 </script>
