@@ -3,87 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crypto Pulse 🌍</title>
+<title>Crypto Pulse PRO 🌍</title>
 
 <style>
 body {
-    margin:0;
-    font-family: Arial;
-    background:#0b0b1a;
-    color:white;
+ margin:0;
+ font-family: Arial;
+ background:#0b0b1a;
+ color:white;
 }
 
 /* HEADER */
 header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px;
-    background:#111133;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:12px;
+ background:#111133;
 }
 
-/* ICONS */
 .icon {
-    font-size:26px;
-    cursor:pointer;
-    margin:0 8px;
-}
-
-/* SEARCH */
-.search input {
-    width:100%;
-    padding:10px;
-    border-radius:20px;
-    border:none;
+ font-size:26px;
+ cursor:pointer;
 }
 
 /* SIDEBAR */
 .sidebar {
-    position:fixed;
-    left:-260px;
-    top:0;
-    width:250px;
-    height:100%;
-    background:#111;
-    padding:10px;
-    transition:0.3s;
+ position:fixed;
+ left:-300px;
+ top:0;
+ width:280px;
+ height:100%;
+ background:#111;
+ padding:15px;
+ transition:0.3s;
+ overflow-y:auto;
 }
+
 .sidebar.open { left:0; }
+
+.closeBtn {
+ font-size:22px;
+ cursor:pointer;
+ margin-bottom:10px;
+ display:inline-block;
+}
 
 /* CARDS */
 .panel {
-    display:flex;
-    flex-wrap:wrap;
-    padding:10px;
+ display:flex;
+ flex-wrap:wrap;
+ padding:10px;
 }
 
 .card {
-    background:#1a1a33;
-    margin:10px;
-    padding:15px;
-    border-radius:12px;
-    width:200px;
+ background:#1a1a33;
+ margin:10px;
+ padding:15px;
+ border-radius:12px;
+ width:200px;
 }
 
-/* TITLES */
+/* NEWS */
+.news-item {
+ background:#222244;
+ margin:8px 0;
+ padding:10px;
+ border-radius:8px;
+ font-size:13px;
+}
+
+/* TITLE */
 .section-title {
-    margin:15px;
-    color:#00ffcc;
-}
-
-/* LANG MENU */
-.lang-box {
-    display:none;
-    position:absolute;
-    right:10px;
-    top:50px;
-    background:#222;
-    padding:10px;
-    border-radius:10px;
-}
-.lang-box button {
-    display:block;
-    margin:5px 0;
+ margin:15px;
+ color:#00ffcc;
 }
 </style>
 </head>
@@ -92,76 +85,45 @@ header {
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-    <h3>Menu</h3>
-    <button onclick="loadMemes()">🚀 Top Memecoins</button>
-    <button onclick="loadNews()">📰 News</button>
+
+ <span class="closeBtn" onclick="toggleMenu()">← Fechar</span>
+
+ <h3>📰 News</h3>
+ <div id="newsBox">Loading news...</div>
+
+ <hr>
+
+ <button onclick="loadMemes()">🚀 Top Memecoins</button>
+
 </div>
 
 <!-- HEADER -->
 <header>
-
-    <div class="icon" onclick="toggleMenu()">☰</div>
-
-    <div class="search">
-        <input id="search" placeholder="Search coin...">
-    </div>
-
-    <div class="icon" onclick="toggleLang()">🌍</div>
-
+ <div class="icon" onclick="toggleMenu()">☰</div>
+ <h3>Crypto PRO</h3>
+ <div class="icon">🌍</div>
 </header>
 
-<!-- LANG BOX -->
-<div class="lang-box" id="langBox">
-    <button onclick="setLang('en')">English</button>
-    <button onclick="setLang('pt')">Português</button>
-    <button onclick="setLang('es')">Español</button>
-    <button onclick="setLang('zh')">中文</button>
-    <button onclick="setLang('ja')">日本</button>
-    <button onclick="setLang('ar')">العربية</button>
-</div>
-
-<div class="section-title" id="titleMarket">Live Market</div>
+<!-- MARKET -->
+<div class="section-title">Live Market</div>
 <div class="panel" id="coins"></div>
 
-<div class="section-title" id="titleExtra">Trending Memecoins</div>
+<div class="section-title">🚀 Memecoins</div>
 <div class="panel" id="extra"></div>
 
 <script>
-
-let lang="en";
 
 // ================= MENU =================
 function toggleMenu(){
  document.getElementById("sidebar").classList.toggle("open");
 }
 
-function toggleLang(){
- document.getElementById("langBox").style.display =
- document.getElementById("langBox").style.display==="block"?"none":"block";
-}
-
-// ================= TRANSLATION =================
-const t = {
- en:{market:"Live Market",memes:"Trending Memecoins"},
- pt:{market:"Mercado ao Vivo",memes:"Memecoins em Alta"},
- es:{market:"Mercado en Vivo",memes:"Memecoins Tendencia"},
- zh:{market:"实时市场",memes:"热门迷因币"},
- ja:{market:"ライブ市場",memes:"トレンドミームコイン"},
- ar:{market:"السوق المباشر",memes:"ميمكوين ترند"}
-};
-
-function setLang(l){
- lang=l;
- document.getElementById("titleMarket").innerText=t[l].market;
- document.getElementById("titleExtra").innerText=t[l].memes;
-}
-
 // ================= MARKET =================
 async function loadCoins(){
- const res=await fetch(
+ const res = await fetch(
  "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1"
  );
- const data=await res.json();
+ const data = await res.json();
 
  let box=document.getElementById("coins");
  box.innerHTML="";
@@ -178,81 +140,63 @@ async function loadCoins(){
  });
 }
 
-// ================= MEMECOINS (REAL TRENDING) =================
+// ================= MEMECOINS (DEXSCREENER REAL HYPE) =================
 async function loadMemes(){
- const res=await fetch(
- "https://api.coingecko.com/api/v3/search/trending"
+ const res = await fetch(
+ "https://api.dexscreener.com/latest/dex/search?q=pepe"
  );
- const data=await res.json();
+ const data = await res.json();
 
  let box=document.getElementById("extra");
  box.innerHTML="";
 
- data.coins.slice(0,10).forEach(i=>{
-  let c=i.item;
+ let pairs = data.pairs || [];
 
+ pairs.slice(0,10).forEach(p=>{
   box.innerHTML+=`
   <div class="card">
-    <h3>🐸 ${c.symbol}</h3>
-    <p>${c.name}</p>
-    <small>#${c.market_cap_rank||"new"}</small>
+    <h3>🚀 ${p.baseToken.symbol}</h3>
+    <p>${p.baseToken.name}</p>
+    <small>Price: $${p.priceUsd || "?"}</small>
   </div>`;
  });
 }
 
-// ================= NEWS (REAL + FALLBACK) =================
+// ================= NEWS (REAL + READY MENU) =================
 async function loadNews(){
-
- let box=document.getElementById("extra");
+ const box=document.getElementById("newsBox");
  box.innerHTML="Loading...";
 
  try {
-   const res=await fetch(
-   "https://api.coingecko.com/api/v3/status_updates"
-   );
-   const data=await res.json();
+  const res = await fetch(
+  "https://api.coingecko.com/api/v3/status_updates"
+  );
+  const data = await res.json();
 
-   box.innerHTML="";
+  let news = data.status_updates.slice(0,3);
 
-   let news=data.status_updates.slice(0,3);
+  if(news.length===0){
+   box.innerHTML="No news available";
+   return;
+  }
 
-   if(news.length===0){
-    box.innerHTML="No news available";
-    return;
-   }
+  box.innerHTML="";
 
-   news.forEach(n=>{
-    box.innerHTML+=`
-    <div class="card">📰 ${n.description.slice(0,120)}...</div>`;
-   });
+  news.forEach(n=>{
+   box.innerHTML+=`
+   <div class="news-item">
+    📰 ${n.description.slice(0,100)}...
+   </div>`;
+  });
 
  } catch(e){
-   box.innerHTML="News error";
+  box.innerHTML="News error";
  }
 }
 
-// ================= SEARCH =================
-document.getElementById("search").addEventListener("input",async(e)=>{
- let q=e.target.value;
- if(q.length<2)return;
-
- const res=await fetch(`https://api.coingecko.com/api/v3/search?query=${q}`);
- const data=await res.json();
-
- let box=document.getElementById("coins");
- box.innerHTML="";
-
- data.coins.slice(0,5).forEach(c=>{
-  box.innerHTML+=`
-  <div class="card">
-    <h3>${c.name}</h3>
-    <p>${c.symbol}</p>
-  </div>`;
- });
-});
-
 // INIT
 loadCoins();
+loadNews();
 setInterval(loadCoins,15000);
 
 </script>
