@@ -6,32 +6,29 @@
 <title>CoinHatFeeds 🌍</title>
 
 <style>
-body {
+body{
  margin:0;
- font-family: Arial;
+ font-family:Arial;
  background:#050814;
- color:#00ffcc;
+ color:#00ffd5;
 }
 
-/* HEADER */
-header {
+header{
  display:flex;
  justify-content:space-between;
  align-items:center;
  padding:12px;
  background:#08122b;
  border-bottom:2px solid #00ffff;
- box-shadow:0 0 12px #00ffff;
 }
 
-.icon {
+.icon{
  font-size:26px;
  cursor:pointer;
- color:#00ffcc;
 }
 
 /* SIDEBAR */
-.sidebar {
+.sidebar{
  position:fixed;
  left:-320px;
  top:0;
@@ -41,27 +38,25 @@ header {
  padding:15px;
  transition:0.3s;
  overflow-y:auto;
- box-shadow:0 0 20px #00ffcc;
 }
+.sidebar.open{left:0;}
 
-.sidebar.open { left:0; }
-
-.closeBtn {
- font-size:20px;
+.closeBtn{
  cursor:pointer;
  color:#00ffff;
+ font-size:20px;
  display:block;
  margin-bottom:10px;
 }
 
-/* CARDS */
-.panel {
+/* GRID */
+.panel{
  display:flex;
  flex-wrap:wrap;
  padding:10px;
 }
 
-.card {
+.card{
  background:#0b1a33;
  margin:10px;
  padding:15px;
@@ -71,24 +66,23 @@ header {
 }
 
 /* NEWS */
-.news-item {
+.news{
  background:#081f3a;
  margin:8px 0;
  padding:10px;
- border-radius:8px;
  border-left:3px solid #00ffff;
  font-size:13px;
 }
 
 /* TITLES */
-.section-title {
+.title{
  margin:15px;
  color:#00ffff;
  text-shadow:0 0 8px #00ffff;
 }
 
 /* LANG */
-.lang-box {
+.lang{
  display:none;
  position:absolute;
  right:10px;
@@ -97,13 +91,12 @@ header {
  padding:10px;
  border:1px solid #00ffff;
 }
-
-.lang-box button {
+.lang button{
  display:block;
  margin:5px 0;
  background:none;
  border:1px solid #00ffff;
- color:#00ffcc;
+ color:#00ffd5;
  cursor:pointer;
 }
 </style>
@@ -128,14 +121,12 @@ header {
 <!-- HEADER -->
 <header>
  <div class="icon" onclick="toggleMenu()">☰</div>
-
  <h3>CoinHatFeeds</h3>
-
  <div class="icon" onclick="toggleLang()">🌍</div>
 </header>
 
 <!-- LANG -->
-<div class="lang-box" id="langBox">
+<div class="lang" id="langBox">
  <button onclick="setLang('en')">EN</button>
  <button onclick="setLang('pt')">PT</button>
  <button onclick="setLang('es')">ES</button>
@@ -144,12 +135,12 @@ header {
  <button onclick="setLang('ar')">AR</button>
 </div>
 
-<!-- MARKET -->
-<div class="section-title" id="tMarket">Live Market</div>
+<!-- MAIN -->
+<div class="title" id="tMarket">Live Market</div>
 <div class="panel" id="coins"></div>
 
-<div class="section-title" id="tMemes">Trending Memecoins</div>
-<div class="panel" id="extra"></div>
+<div class="title" id="tMemes">Trending Memecoins</div>
+<div class="panel" id="memes"></div>
 
 <script>
 
@@ -160,17 +151,17 @@ function toggleMenu(){
  document.getElementById("sidebar").classList.toggle("open");
 }
 
-// ================= LANG =================
 function toggleLang(){
  let b=document.getElementById("langBox");
  b.style.display = b.style.display==="block"?"none":"block";
 }
 
+// ================= TRANSLATION =================
 const t={
  en:{m:"Live Market",me:"Trending Memecoins"},
  pt:{m:"Mercado",me:"Memecoins em Alta"},
  es:{m:"Mercado",me:"Memecoins"},
- zh:{m:"市场",me:"热门迷因币"},
+ zh:{m:"市场",me:"迷因币"},
  ja:{m:"市場",me:"ミームコイン"},
  ar:{m:"السوق",me:"ميمكوين"}
 };
@@ -181,7 +172,7 @@ function setLang(l){
  document.getElementById("tMemes").innerText=t[l].me;
 }
 
-// ================= COINS =================
+// ================= MARKET =================
 async function loadCoins(){
  const res=await fetch(
  "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1"
@@ -196,34 +187,36 @@ async function loadCoins(){
   <div class="card">
    <h3>${c.symbol.toUpperCase()}</h3>
    <p>$${c.current_price}</p>
-   <p style="color:${c.price_change_percentage_24h>0?'#00ff00':'#ff0040'}">
+   <p style="color:${c.price_change_percentage_24h>0?'#00ff00':'#ff0055'}">
    ${c.price_change_percentage_24h.toFixed(2)}%
    </p>
   </div>`;
  });
 }
 
-// ================= MEMECOINS (DEXSCREENER) =================
+// ================= MEMECOINS (REAL TRENDING FIXED) =================
 async function loadMemes(){
  const res=await fetch(
- "https://api.dexscreener.com/latest/dex/search?q=pepe"
+ "https://api.coingecko.com/api/v3/search/trending"
  );
  const data=await res.json();
 
- let box=document.getElementById("extra");
+ let box=document.getElementById("memes");
  box.innerHTML="";
 
- (data.pairs||[]).slice(0,10).forEach(p=>{
+ (data.coins||[]).slice(0,10).forEach(i=>{
+  let c=i.item;
+
   box.innerHTML+=`
   <div class="card">
-   <h3>🚀 ${p.baseToken.symbol}</h3>
-   <p>${p.baseToken.name}</p>
-   <small>$${p.priceUsd || "?"}</small>
+   <h3>🚀 ${c.symbol}</h3>
+   <p>${c.name}</p>
+   <small>#${c.market_cap_rank||"new"}</small>
   </div>`;
  });
 }
 
-// ================= NEWS =================
+// ================= NEWS (FIXED REAL 3 ITEMS) =================
 async function loadNews(){
  const box=document.getElementById("newsBox");
  box.innerHTML="Loading...";
@@ -239,13 +232,13 @@ async function loadNews(){
   box.innerHTML="";
 
   if(news.length===0){
-   box.innerHTML="No news available";
+   box.innerHTML="No news found";
    return;
   }
 
   news.forEach(n=>{
    box.innerHTML+=`
-   <div class="news-item">
+   <div class="news">
     📰 ${n.description.slice(0,120)}...
    </div>`;
   });
