@@ -1,250 +1,167 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoinHat Feeds • Memecoins Ao Vivo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; }
-        .title { font-family: 'Space Grotesk', sans-serif; }
-        
-        .app-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #312e81 50%, #7c3aed 100%);
-        }
-        
-        .card {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(16px);
-            transition: all 0.4s ease;
-        }
-        .card:hover {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 30px 70px -20px rgb(167 139 250);
-        }
-        
-        .logo-glow {
-            animation: float 4s ease-in-out infinite;
-            filter: drop-shadow(0 0 30px #facc15);
-        }
-        
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    </style>
-</head>
-<body class="bg-slate-950 text-white min-h-screen app-bg overflow-hidden">
+<script>
 
-    <!-- HEADER -->
-    <header class="bg-black/70 backdrop-blur-xl border-b border-violet-400/30 sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
-            <!-- Menu Hambúrguer + Logo -->
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="text-4xl text-yellow-300 hover:text-white p-3 rounded-2xl transition">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                
-                <div class="flex items-center gap-3">
-                    <div class="w-16 h-16 bg-yellow-400 rounded-3xl p-2 shadow-2xl logo-glow">
-                        <img src="https://i.ibb.co/z5CXa/coinhat-logo.png" alt="CoinHat" class="w-full h-full object-contain rounded-2xl">
-                    </div>
-                    <div>
-                        <h1 class="title text-4xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-violet-300">
-                            CoinHat Feeds
-                        </h1>
-                        <p class="text-xs text-violet-200">Memecoins em tempo real</p>
-                    </div>
-                </div>
-            </div>
+/* ── i18n ── */
+const i18n = {
+  pt:{ title:'🐸 Memecoins em Destaque', sub:'Cotações e gráficos em tempo real', news:'📰 Crypto News', refresh:'Atualizar', vol:'Vol 24h', liq:'Liquidez', mc:'Mkt Cap', contract:'Contrato', search:'Buscar token...' },
+  en:{ title:'🐸 Top Memecoins', sub:'Real-time prices and charts', news:'📰 Crypto News', refresh:'Refresh', vol:'Vol 24h', liq:'Liquidity', mc:'Mkt Cap', contract:'Contract', search:'Search token...' },
+};
 
-            <!-- Busca por contrato -->
-            <div class="flex-1 max-w-xl mx-8">
-                <div class="relative">
-                    <input id="searchInput" type="text" 
-                           placeholder="Colar contrato (ex: Solana CA ou 0x...)" 
-                           class="w-full bg-white/10 border border-violet-400/60 focus:border-yellow-400 rounded-3xl py-4 px-7 pl-14 text-lg placeholder:text-violet-300 focus:outline-none">
-                    <i class="fa-solid fa-magnifying-glass absolute left-6 top-1/2 -translate-y-1/2 text-yellow-400 text-2xl"></i>
-                </div>
-            </div>
+let lang = 'pt';
 
-            <!-- Multi-idioma -->
-            <div class="relative">
-                <button onclick="toggleLangDropdown()" 
-                        class="flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-violet-400/50 px-6 py-3 rounded-3xl text-sm font-medium transition">
-                    <span class="text-2xl">🌐</span>
-                    <span id="currentLang">🇧🇷 PT</span>
-                </button>
-                
-                <!-- Dropdown Idiomas -->
-                <div id="langDropdown" class="hidden absolute right-0 mt-3 w-64 bg-slate-900 border border-violet-400/50 rounded-3xl shadow-2xl py-3 z-50">
-                    <div onclick="changeLang(this)" data-lang="pt" class="flex items-center gap-4 px-6 py-3 hover:bg-violet-600/30 cursor-pointer rounded-2xl mx-2">
-                        <span class="text-3xl">🇧🇷</span>
-                        <div><p class="font-semibold">Português</p><p class="text-xs text-gray-400">Brasil</p></div>
-                    </div>
-                    <div onclick="changeLang(this)" data-lang="en" class="flex items-center gap-4 px-6 py-3 hover:bg-violet-600/30 cursor-pointer rounded-2xl mx-2">
-                        <span class="text-3xl">🇬🇧</span>
-                        <div><p class="font-semibold">English</p><p class="text-xs text-gray-400">Inglês</p></div>
-                    </div>
-                    <div onclick="changeLang(this)" data-lang="zh" class="flex items-center gap-4 px-6 py-3 hover:bg-violet-600/30 cursor-pointer rounded-2xl mx-2">
-                        <span class="text-3xl">🇨🇳</span>
-                        <div><p class="font-semibold">中文</p><p class="text-xs text-gray-400">Chinês</p></div>
-                    </div>
-                    <div onclick="changeLang(this)" data-lang="es" class="flex items-center gap-4 px-6 py-3 hover:bg-violet-600/30 cursor-pointer rounded-2xl mx-2">
-                        <span class="text-3xl">🇪🇸</span>
-                        <div><p class="font-semibold">Español</p><p class="text-xs text-gray-400">Espanhol</p></div>
-                    </div>
-                    <div onclick="changeLang(this)" data-lang="ja" class="flex items-center gap-4 px-6 py-3 hover:bg-violet-600/30 cursor-pointer rounded-2xl mx-2">
-                        <span class="text-3xl">🇯🇵</span>
-                        <div><p class="font-semibold">日本語</p><p class="text-xs text-gray-400">Japonês</p></div>
-                    </div>
-                    <div onclick="changeLang(this)" data-lang="ru" class="flex items-center gap-4 px-6 py-3 hover:bg-violet-600/30 cursor-pointer rounded-2xl mx-2">
-                        <span class="text-3xl">🇷🇺</span>
-                        <div><p class="font-semibold">Русский</p><p class="text-xs text-gray-400">Russo</p></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+function setLang(l, el) {
+  lang = l;
+  const t = i18n[l];
 
-    <div class="flex max-w-screen-2xl mx-auto h-[calc(100vh-85px)]">
-        
-        <!-- SIDEBAR MENU -->
-        <div id="sidebar" class="w-72 bg-slate-900/95 border-r border-violet-400/30 p-6 fixed md:relative h-full -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 overflow-auto">
-            <div class="flex justify-between mb-8 md:hidden">
-                <h2 class="text-2xl font-bold">Menu</h2>
-                <button onclick="toggleSidebar()" class="text-3xl">✕</button>
-            </div>
-            
-            <div class="space-y-2 text-lg">
-                <div onclick="selectMenu(this)" class="flex items-center gap-4 px-5 py-4 rounded-3xl bg-violet-600/30 hover:bg-violet-600/50 cursor-pointer">
-                    <i class="fa-solid fa-newspaper text-xl"></i>
-                    <span>Notícias do Mercado</span>
-                </div>
-                <div onclick="selectMenu(this)" class="flex items-center gap-4 px-5 py-4 rounded-3xl hover:bg-white/10 cursor-pointer">
-                    <span class="text-2xl">🐦‍🔥</span>
-                    <span>Solana Memecoins</span>
-                </div>
-                <div onclick="selectMenu(this)" class="flex items-center gap-4 px-5 py-4 rounded-3xl hover:bg-white/10 cursor-pointer">
-                    <span class="text-2xl">🪙</span>
-                    <span>BNB Chain</span>
-                </div>
-                <div onclick="selectMenu(this)" class="flex items-center gap-4 px-5 py-4 rounded-3xl hover:bg-white/10 cursor-pointer">
-                    <span class="text-2xl">💎</span>
-                    <span>Ethereum</span>
-                </div>
-                <div onclick="selectMenu(this)" class="flex items-center gap-4 px-5 py-4 rounded-3xl hover:bg-white/10 cursor-pointer">
-                    <i class="fa-solid fa-fire"></i>
-                    <span>Memecoins em Alta</span>
-                </div>
-            </div>
-        </div>
+  document.getElementById('nt-title').textContent = t.title;
+  document.getElementById('nt-sub').innerHTML = t.sub + ' · <span class="live"><span class="live-dot"></span>LIVE</span>';
+  document.getElementById('nt-news').textContent = t.news;
+  document.getElementById('nt-refresh').textContent = t.refresh;
+  document.getElementById('nt-vol').textContent = t.vol;
+  document.getElementById('nt-liq').textContent = t.liq;
+  document.getElementById('nt-mc').textContent = t.mc;
+  document.getElementById('nt-contract').textContent = t.contract;
+  document.getElementById('searchInput').placeholder = t.search;
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="flex-1 p-8 overflow-auto">
-            <h2 class="title text-5xl font-bold tracking-tighter mb-2 text-white">Memecoins ao Vivo</h2>
-            <p class="text-violet-200 mb-8">Dados via DEXScreener • Solana • BNB • ETH</p>
+  document.querySelectorAll('.lang-opt').forEach(x => x.classList.remove('selected'));
+  if (el) el.classList.add('selected');
 
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6" id="memecoinsGrid">
-                <!-- Preenchido pelo JavaScript -->
-            </div>
-        </main>
-    </div>
+  toggleLang();
+}
 
-    <script>
-        // Memecoins populares com CA de exemplo (você pode adicionar mais)
-        const popularTokens = [
-            { symbol: "WIF", name: "dogwifhat", chain: "solana", icon: "🐕", address: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm" },
-            { symbol: "BONK", name: "Bonk", chain: "solana", icon: "🐶", address: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263" },
-            { symbol: "PEPE", name: "Pepe", chain: "ethereum", icon: "🐸", address: "0x6982508145454ce325ddbe47a25d4ec3d2311933" },
-            { symbol: "FLOKI", name: "Floki", chain: "bsc", icon: "🦊", address: "0xfb5b4b6f7f8a4b9f0e8e0e6e5e8e8e8e8e8e8e8e" }, // exemplo
-            { symbol: "GROK", name: "Grok", chain: "ethereum", icon: "🤖", address: "0x...grok" }
-        ];
+function toggleLang() {
+  document.getElementById('langMenu').classList.toggle('active');
+}
 
-        async function fetchDexScreener(token) {
-            try {
-                // DEXScreener busca por par ou token
-                const url = `https://api.dexscreener.com/latest/dex/tokens/${token.address || token.symbol}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                
-                if (data.pairs && data.pairs.length > 0) {
-                    const pair = data.pairs[0];
-                    return {
-                        price: parseFloat(pair.priceUsd || 0).toFixed(8),
-                        change: parseFloat(pair.priceChange.h24 || 0).toFixed(1)
-                    };
-                }
-            } catch (e) {
-                console.log("DEXScreener falhou para", token.symbol);
-            }
-            // Fallback mock
-            return {
-                price: (Math.random() * 0.01 + 0.000001).toFixed(8),
-                change: (Math.random() * 40 - 15).toFixed(1)
-            };
-        }
+/* ── NEWS ── */
+function openNews() {
+  document.getElementById('newsPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('active');
+}
+function closeNews() {
+  document.getElementById('newsPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('active');
+}
 
-        async function loadMemecoins() {
-            const grid = document.getElementById('memecoinsGrid');
-            grid.innerHTML = '';
+/* ── UTILS ── */
+function fmt(n) {
+  if (!n || isNaN(n)) return '—';
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(2) + 'K';
+  return '$' + n.toFixed(4);
+}
 
-            for (let token of popularTokens) {
-                const info = await fetchDexScreener(token);
-                
-                const card = document.createElement('div');
-                card.className = `card rounded-3xl p-6 border border-violet-300/30 shadow-xl`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-4">
-                            <div class="text-6xl drop-shadow">${token.icon}</div>
-                            <div>
-                                <p class="text-3xl font-bold">${token.symbol}</p>
-                                <p class="text-sm text-violet-300">${token.chain.toUpperCase()}</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-3xl font-semibold text-emerald-400">$${info.price}</p>
-                            <p class="${parseFloat(info.change) > 0 ? 'text-emerald-400' : 'text-rose-400'} text-lg font-bold">
-                                ${parseFloat(info.change) > 0 ? '▲' : '▼'} ${Math.abs(info.change)}%
-                            </p>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            }
-        }
+function fmtChg(c) {
+  if (c == null) return '';
+  return (c >= 0 ? '+' : '') + c.toFixed(2) + '%';
+}
 
-        // Funções do Menu e Idioma
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-        }
+/* ── LOAD MEMECOINS ── */
+let memeData = [];
 
-        function selectMenu(el) {
-            document.querySelectorAll('#sidebar > div').forEach(item => item.classList.remove('bg-violet-600/30'));
-            el.classList.add('bg-violet-600/30');
-            toggleSidebar();
-        }
+async function loadMemecoins() {
+  try {
+    const res = await fetch('https://api.dexscreener.com/latest/dex/search?q=meme');
+    const data = await res.json();
 
-        function toggleLangDropdown() {
-            document.getElementById('langDropdown').classList.toggle('hidden');
-        }
+    memeData = (data.pairs || []).slice(0, 12);
+    renderMemes(memeData);
 
-        function changeLang(el) {
-            const langText = el.querySelector('p').textContent;
-            const flag = el.querySelector('span').textContent;
-            document.getElementById('currentLang').innerHTML = `${flag} ${langText.split(' ')[0]}`;
-            toggleLangDropdown();
-            alert(`Idioma alterado para ${langText} (demo)`);
-        }
+  } catch {
+    document.getElementById('memeGrid').innerHTML =
+      '<p style="color:gray;padding:20px">Erro ao carregar dados</p>';
+  }
+}
 
-        // Inicialização
-        window.onload = () => {
-            loadMemecoins();
-            // Atualiza automaticamente a cada 12 segundos
-            setInterval(loadMemecoins, 12000);
-        };
-    </script>
-</body>
-</html>
+function renderMemes(pairs) {
+  const grid = document.getElementById('memeGrid');
+  grid.innerHTML = '';
+
+  pairs.forEach(pair => {
+
+    const div = document.createElement('div');
+    div.className = 'meme-card';
+
+    div.innerHTML = `
+      <div class="meme-name">${pair.baseToken?.name}</div>
+      <div>${fmt(pair.priceUsd)}</div>
+      <div>${fmtChg(pair.priceChange?.h24)}</div>
+    `;
+
+    div.onclick = () => openModal(pair);
+
+    grid.appendChild(div);
+  });
+}
+
+/* ── MODAL ── */
+function openModal(pair) {
+
+  document.body.style.overflow = 'hidden';
+
+  document.getElementById('m-name').textContent = pair.baseToken?.name;
+  document.getElementById('m-price').textContent = fmt(pair.priceUsd);
+
+  document.getElementById('tokenModal').classList.add('active');
+}
+
+function closeModal() {
+  document.body.style.overflow = '';
+  document.getElementById('tokenModal').classList.remove('active');
+}
+
+/* ── SEARCH ── */
+let timeout;
+
+async function onSearch(q) {
+
+  clearTimeout(timeout);
+
+  if (!q || q.length < 2) return;
+
+  timeout = setTimeout(async () => {
+
+    const res = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${q}`);
+    const data = await res.json();
+
+    const box = document.getElementById('search-results');
+
+    box.innerHTML = data.pairs.slice(0, 5).map((p,i) => `
+      <div onclick="selectSearch(${i})">
+        ${p.baseToken.symbol}
+      </div>
+    `).join('');
+
+    window._searchPairs = data.pairs;
+
+  }, 400);
+}
+
+function selectSearch(i) {
+  openModal(window._searchPairs[i]);
+}
+
+/* ── CHAT ── */
+function toggleChat() {
+  document.getElementById('chatWindow').classList.toggle('open');
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value;
+
+  if (!msg) return;
+
+  const box = document.getElementById('chatMessages');
+
+  box.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+  box.innerHTML += `<div class="chat-msg bot">Em desenvolvimento 😄</div>`;
+
+  input.value = '';
+}
+
+/* ── INIT ── */
+loadMemecoins();
+setInterval(loadMemecoins, 30000);
+
+</script>
