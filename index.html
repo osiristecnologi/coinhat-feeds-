@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,606 +6,274 @@
     <title>CoinHat Feeds • Memecoins & Notícias</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
-        :root {
-            --tw-color-primary: #7c3aed;
-        }
-        
-        * {
-            font-family: 'Inter', system_ui, sans-serif;
-        }
+        * { font-family: 'Inter', system_ui, sans-serif; }
         
         .app-container {
             background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #c7d2fe 100%);
-            box-shadow: 0 0 80px -20px rgb(124 58 237);
         }
         
-        .card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 25px 50px -12px rgb(124 58 237 / 0.2); }
+        
+        .sidebar {
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
         }
         
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 25px 25px 50px -12px rgb(124 58 237 / 0.15);
-        }
-        
-        .logo-circle {
-            animation: spin-slow 20s linear infinite;
-        }
-        
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .search-input {
-            transition: all 0.3s ease;
-        }
-        
-        .search-input:focus {
-            width: 420px;
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
-        }
-        
-        .price-ticker {
-            animation: ticker-pulse 2s infinite;
-        }
+        .price-ticker { animation: ticker-pulse 2.5s infinite; }
+        @keyframes ticker-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
     </style>
 </head>
-<body class="bg-white min-h-screen">
-    <!-- HEADER / TOP BAR - Estilo app mobile -->
+<body class="bg-white min-h-screen overflow-hidden">
+
+    <!-- HEADER -->
     <header class="bg-white border-b border-violet-200 shadow-lg sticky top-0 z-50">
         <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
             
-            <!-- Logo + Nome (EXATAMENTE a imagem que você enviou) -->
-            <div class="flex items-center gap-x-3">
-                <div class="w-14 h-14 bg-yellow-400 rounded-full p-1 shadow-inner flex items-center justify-center logo-circle">
-                    <img id="logo" 
-                         src="https://i.ibb.co/z5CXa/coinhat-logo.png" 
-                         alt="CoinHat Feeds Logo - Frog com chapéu" 
-                         class="w-12 h-12 rounded-full object-contain drop-shadow-md"
-                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 200%27%3E%3Ccircle cx=%27100%27 cy=%27100%27 r=%2790%27 fill=%27%23facc15%27/%3E%3Ctext x=%27100%27 y=%27115%27 font-size=%2780%27 text-anchor=%27middle%27 fill=%27%2310b981%27%3E🐸%3C/text%3E%3C/svg%27'; console.log('Usando logo fallback - substitua pela sua imagem!')">
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold tracking-tighter text-violet-700">CoinHat Feeds</h1>
-                    <p class="text-xs text-violet-500 -mt-1 font-medium">Memecoins • Solana • BNB • ETH</p>
+            <!-- Menu Hambúrguer + Logo -->
+            <div class="flex items-center gap-x-4">
+                <button onclick="toggleSidebar()" 
+                        class="w-11 h-11 flex items-center justify-center text-3xl text-violet-700 hover:bg-violet-100 rounded-2xl transition">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                
+                <div class="flex items-center gap-x-3">
+                    <div class="w-14 h-14 bg-yellow-400 rounded-full p-1 shadow-inner flex items-center justify-center">
+                        <img src="https://i.ibb.co/z5CXa/coinhat-logo.png" 
+                             alt="CoinHat Logo" 
+                             class="w-12 h-12 rounded-full object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold tracking-tighter text-violet-700">CoinHat Feeds</h1>
+                        <p class="text-xs text-violet-500 -mt-1">Memecoins em tempo real</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- BARRA DE BUSCA com lupa (busca por contrato) -->
+            <!-- Busca -->
             <div class="flex-1 max-w-xl mx-8 relative">
-                <div class="relative">
-                    <input 
-                        id="searchInput"
-                        type="text" 
-                        placeholder="Buscar memecoin por contrato (0x... ou CA)"
-                        class="search-input w-full bg-white border border-violet-300 focus:border-violet-500 rounded-3xl px-6 py-4 pl-14 text-lg placeholder:text-violet-400 focus:outline-none shadow-inner text-gray-800">
-                    <!-- Ícone de lupa -->
-                    <div class="absolute left-6 top-1/2 -translate-y-1/2 text-violet-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 01-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <!-- Sugestões rápidas ao focar (mock) -->
-                <div id="searchSuggestions" class="hidden absolute mt-2 w-full bg-white rounded-3xl shadow-2xl border border-violet-200 py-2 text-sm z-50 max-h-64 overflow-auto">
-                    <!-- JS irá preencher -->
+                <input id="searchInput" type="text" 
+                       placeholder="Buscar por contrato (0x... ou CA Solana)" 
+                       class="w-full bg-white border border-violet-300 focus:border-violet-500 rounded-3xl px-6 py-4 pl-14 text-lg placeholder:text-violet-400 focus:outline-none shadow-inner">
+                <div class="absolute left-6 top-1/2 -translate-y-1/2 text-violet-500">
+                    <i class="fa-solid fa-magnifying-glass text-2xl"></i>
                 </div>
             </div>
 
-            <!-- ÍCONE MULTI-LINGUAGEM (direita) -->
+            <!-- Multi-idioma -->
             <div class="flex items-center gap-x-6">
-                <div class="relative" id="languageSelector">
-                    <button onclick="toggleLanguageDropdown()" 
-                            class="flex items-center gap-x-2 bg-white hover:bg-violet-50 border border-violet-300 rounded-3xl px-5 py-3 text-sm font-semibold text-violet-700 transition-all">
-                        <span class="text-2xl">🌐</span>
-                        <span id="currentLang" class="font-medium">PT</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    
-                    <!-- Dropdown de idiomas -->
-                    <div id="langDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-3xl shadow-2xl border border-violet-200 py-2 z-50">
-                        <div onclick="changeLanguage('en')" class="flex items-center gap-3 px-6 py-3 hover:bg-violet-50 cursor-pointer rounded-3xl mx-2">
-                            <span class="text-3xl">🇬🇧</span>
-                            <div>
-                                <p class="font-semibold">English</p>
-                                <p class="text-xs text-gray-500">Inglês</p>
-                            </div>
-                        </div>
-                        <div onclick="changeLanguage('pt')" class="flex items-center gap-3 px-6 py-3 hover:bg-violet-50 cursor-pointer rounded-3xl mx-2 bg-violet-50">
-                            <span class="text-3xl">🇧🇷</span>
-                            <div>
-                                <p class="font-semibold">Português</p>
-                                <p class="text-xs text-gray-500">Português (BR)</p>
-                            </div>
-                        </div>
-                        <div onclick="changeLanguage('zh')" class="flex items-center gap-3 px-6 py-3 hover:bg-violet-50 cursor-pointer rounded-3xl mx-2">
-                            <span class="text-3xl">🇨🇳</span>
-                            <div>
-                                <p class="font-semibold">中文</p>
-                                <p class="text-xs text-gray-500">Chinês</p>
-                            </div>
-                        </div>
-                        <div onclick="changeLanguage('es')" class="flex items-center gap-3 px-6 py-3 hover:bg-violet-50 cursor-pointer rounded-3xl mx-2">
-                            <span class="text-3xl">🇪🇸</span>
-                            <div>
-                                <p class="font-semibold">Español</p>
-                                <p class="text-xs text-gray-500">Espanhol</p>
-                            </div>
-                        </div>
-                        <div onclick="changeLanguage('ja')" class="flex items-center gap-3 px-6 py-3 hover:bg-violet-50 cursor-pointer rounded-3xl mx-2">
-                            <span class="text-3xl">🇯🇵</span>
-                            <div>
-                                <p class="font-semibold">日本語</p>
-                                <p class="text-xs text-gray-500">Japonês</p>
-                            </div>
-                        </div>
-                        <div onclick="changeLanguage('ru')" class="flex items-center gap-3 px-6 py-3 hover:bg-violet-50 cursor-pointer rounded-3xl mx-2">
-                            <span class="text-3xl">🇷🇺</span>
-                            <div>
-                                <p class="font-semibold">Русский</p>
-                                <p class="text-xs text-gray-500">Russo</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botão de perfil (app style) -->
-                <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-inner text-xl cursor-pointer hover:scale-110 transition">
+                <button onclick="toggleLanguageDropdown()" 
+                        class="flex items-center gap-x-2 bg-white hover:bg-violet-50 border border-violet-300 rounded-3xl px-5 py-3 text-sm font-semibold text-violet-700">
+                    <span class="text-2xl">🌐</span>
+                    <span id="currentLang" class="font-medium">PT</span>
+                </button>
+                
+                <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-inner cursor-pointer">
                     👑
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="flex max-w-screen-2xl mx-auto app-container min-h-[calc(100vh-73px)] rounded-t-3xl overflow-hidden border-t-4 border-violet-400">
+    <div class="flex max-w-screen-2xl mx-auto h-[calc(100vh-73px)] app-container">
         
-        <!-- MENU LATERAL ESQUERDO - Notícias -->
-        <aside class="w-80 bg-white/80 backdrop-blur-xl border-r border-violet-200 p-6 flex flex-col">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-violet-700 flex items-center gap-2">
-                    <span>📰</span> 
-                    Notícias
-                </h2>
-                <p class="text-sm text-violet-500 mt-1">Mercado Cripto • Atualizadas agora</p>
-            </div>
-            
-            <!-- Lista rápida de categorias do menu -->
-            <div class="space-y-2 mb-8">
-                <a onclick="fakeNavClick(this)" class="flex items-center gap-3 px-4 py-3 rounded-3xl bg-violet-100 text-violet-700 font-medium">
-                    <span class="text-xl">🔥</span>
-                    <span>Últimas do mercado</span>
-                </a>
-                <a onclick="fakeNavClick(this)" class="flex items-center gap-3 px-4 py-3 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium">
-                    <span class="text-xl">🐸</span>
-                    <span>Memecoins em alta</span>
-                </a>
-                <a onclick="fakeNavClick(this)" class="flex items-center gap-3 px-4 py-3 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium">
-                    <span class="text-xl">📈</span>
-                    <span>Solana • BNB • ETH</span>
-                </a>
-                <a onclick="fakeNavClick(this)" class="flex items-center gap-3 px-4 py-3 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium">
-                    <span class="text-xl">🚀</span>
-                    <span>Lançamentos</span>
-                </a>
-            </div>
-
-            <!-- Mini feed de notícias no menu (para dar sensação de menu dinâmico) -->
-            <div class="text-xs uppercase tracking-widest text-violet-400 mb-3 px-2">Destaques rápidos</div>
-            <div class="space-y-4 flex-1 overflow-auto">
-                <div class="flex gap-3 text-sm">
-                    <div class="w-2 h-2 mt-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <p class="line-clamp-2">Bitcoin bate $92k após ETF da BlackRock</p>
-                </div>
-                <div class="flex gap-3 text-sm">
-                    <div class="w-2 h-2 mt-1.5 bg-amber-400 rounded-full"></div>
-                    <p class="line-clamp-2">PEPE sobe 42% em 24h na Solana</p>
-                </div>
-                <div class="flex gap-3 text-sm">
-                    <div class="w-2 h-2 mt-1.5 bg-rose-400 rounded-full"></div>
-                    <p class="line-clamp-2">Reguladores da China liberam memecoins</p>
-                </div>
-            </div>
-        </aside>
-
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="flex-1 p-8 overflow-auto">
-            
-            <!-- INTERFACE MEMECOINS - Valores em tempo real -->
-            <div class="mb-10">
-                <div class="flex items-end justify-between mb-6">
-                    <div>
-                        <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">Memecoins ao vivo</h2>
-                        <p class="text-violet-600 font-medium">Preços em tempo real • Redes: Solana • BNB Chain • Ethereum</p>
-                    </div>
-                    <div class="text-xs bg-white px-5 py-2 rounded-3xl shadow flex items-center gap-2 text-emerald-500 font-medium">
-                        <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
-                        ATUALIZANDO A CADA 3s
-                    </div>
-                </div>
-
-                <!-- Cards de preços em tempo real -->
-                <div class="grid grid-cols-6 gap-4 mb-8" id="priceCards">
-                    <!-- JS vai gerar 6 cards dinâmicos -->
-                </div>
-
-                <!-- GRÁFICOS DAS REDES -->
-                <div class="grid grid-cols-3 gap-6">
-                    <!-- Gráfico Solana -->
-                    <div class="bg-white rounded-3xl p-6 shadow-xl border border-violet-100">
-                        <div class="flex justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-3xl">🐦‍🔥</span>
-                                <div>
-                                    <p class="font-bold text-lg">Solana Memecoins</p>
-                                    <p class="text-emerald-500 text-sm">+8.4% • 24h</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-semibold">$142.8M</p>
-                                <p class="text-xs text-gray-400">Volume 24h</p>
-                            </div>
-                        </div>
-                        <canvas id="chartSolana" class="h-52"></canvas>
-                    </div>
-                    
-                    <!-- Gráfico BNB -->
-                    <div class="bg-white rounded-3xl p-6 shadow-xl border border-violet-100">
-                        <div class="flex justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-3xl">🪙</span>
-                                <div>
-                                    <p class="font-bold text-lg">BNB Chain</p>
-                                    <p class="text-amber-500 text-sm">+3.1% • 24h</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-semibold">$87.4M</p>
-                                <p class="text-xs text-gray-400">Volume 24h</p>
-                            </div>
-                        </div>
-                        <canvas id="chartBNB" class="h-52"></canvas>
-                    </div>
-                    
-                    <!-- Gráfico Ethereum -->
-                    <div class="bg-white rounded-3xl p-6 shadow-xl border border-violet-100">
-                        <div class="flex justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-3xl">💎</span>
-                                <div>
-                                    <p class="font-bold text-lg">Ethereum Memecoins</p>
-                                    <p class="text-blue-500 text-sm">-1.9% • 24h</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-semibold">$213M</p>
-                                <p class="text-xs text-gray-400">Volume 24h</p>
-                            </div>
-                        </div>
-                        <canvas id="chartETH" class="h-52"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ÚLTIMAS NOTÍCIAS DO MERCADO CRIPTO (cards) -->
-            <div>
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-3xl font-bold text-violet-700">Últimas notícias do mercado cripto</h2>
-                    <button onclick="refreshNews()" 
-                            class="text-sm flex items-center gap-2 bg-white px-6 py-3 rounded-3xl border border-violet-300 hover:border-violet-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15m-6 0a8 8 0 01-7.714-6.19" />
-                        </svg>
-                        Atualizar
+        <!-- SIDEBAR MENU (esquerda deslizante) -->
+        <div id="sidebar" class="sidebar fixed md:relative inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl border-r border-violet-200 transform -translate-x-full md:translate-x-0 overflow-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-bold text-violet-700">Menu</h2>
+                    <button onclick="toggleSidebar()" class="text-3xl md:hidden text-violet-500">
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
                 
-                <div class="grid grid-cols-3 gap-6" id="newsGrid">
-                    <!-- Cards de notícias serão gerados via JS -->
+                <div class="space-y-2">
+                    <a onclick="selectMenu(this)" class="flex items-center gap-3 px-5 py-4 rounded-3xl bg-violet-100 text-violet-700 font-medium cursor-pointer">
+                        <i class="fa-solid fa-newspaper text-xl"></i>
+                        <span>Notícias do Mercado</span>
+                    </a>
+                    <a onclick="selectMenu(this)" class="flex items-center gap-3 px-5 py-4 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium cursor-pointer">
+                        <i class="fa-solid fa-fire text-xl"></i>
+                        <span>Memecoins em Alta</span>
+                    </a>
+                    <a onclick="selectMenu(this)" class="flex items-center gap-3 px-5 py-4 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium cursor-pointer">
+                        <span class="text-2xl">🐦‍🔥</span>
+                        <span>Rede Solana</span>
+                    </a>
+                    <a onclick="selectMenu(this)" class="flex items-center gap-3 px-5 py-4 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium cursor-pointer">
+                        <span class="text-2xl">🪙</span>
+                        <span>Rede BNB Chain</span>
+                    </a>
+                    <a onclick="selectMenu(this)" class="flex items-center gap-3 px-5 py-4 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium cursor-pointer">
+                        <span class="text-2xl">💎</span>
+                        <span>Rede Ethereum</span>
+                    </a>
+                    <a onclick="selectMenu(this)" class="flex items-center gap-3 px-5 py-4 rounded-3xl hover:bg-violet-50 text-gray-700 font-medium cursor-pointer">
+                        <i class="fa-solid fa-chart-line text-xl"></i>
+                        <span>Todas as Redes</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL (mais espaço agora) -->
+        <main class="flex-1 p-6 md:p-8 overflow-auto">
+            
+            <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600 mb-2">
+                Memecoins ao Vivo
+            </h2>
+            <p class="text-violet-600 mb-8">Preços atualizados via CoinGecko • Solana • BNB • Ethereum</p>
+
+            <!-- Grid de Memecoins (mais espaço) -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6" id="priceCards">
+                <!-- Populando via JS -->
+            </div>
+
+            <!-- Gráficos das Redes -->
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-3xl p-6 shadow-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl">🐦‍🔥</span>
+                        <div>
+                            <p class="font-bold text-xl">Solana</p>
+                            <p class="text-emerald-500 text-sm">Memecoins Volume</p>
+                        </div>
+                    </div>
+                    <canvas id="chartSolana" height="180"></canvas>
+                </div>
+                <div class="bg-white rounded-3xl p-6 shadow-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl">🪙</span>
+                        <div>
+                            <p class="font-bold text-xl">BNB Chain</p>
+                            <p class="text-amber-500 text-sm">Memecoins Volume</p>
+                        </div>
+                    </div>
+                    <canvas id="chartBNB" height="180"></canvas>
+                </div>
+                <div class="bg-white rounded-3xl p-6 shadow-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl">💎</span>
+                        <div>
+                            <p class="font-bold text-xl">Ethereum</p>
+                            <p class="text-blue-500 text-sm">Memecoins Volume</p>
+                        </div>
+                    </div>
+                    <canvas id="chartETH" height="180"></canvas>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- FOOTER minimalista (estilo app) -->
-    <footer class="bg-white border-t py-4 text-center text-xs text-violet-400 max-w-screen-2xl mx-auto">
-        CoinHat Feeds © 2026 • Apenas dados mock para demonstração • Feito com ❤️ para NOBIUS
-    </footer>
-
     <script>
-        // ====================== TAILWIND CONFIG ======================
-        function initializeTailwind() {
-            return {
-                config(userConfig = {}) {
-                    return {
-                        content: [],
-                        theme: {
-                            extend: {}
-                        },
-                        plugins: [],
-                        ...userConfig,
-                    }
-                },
-                theme: {
-                    extend: {
-                        colors: {
-                            primary: '#7c3aed'
-                        }
-                    }
-                }
+        // ====================== DADOS MOCK + API ======================
+        let coins = [
+            { id: "pepe", symbol: "PEPE", name: "Pepe", chain: "ETH", icon: "🐸" },
+            { id: "bonk", symbol: "BONK", name: "Bonk", chain: "SOL", icon: "🐶" },
+            { id: "floki", symbol: "FLOKI", name: "Floki", chain: "BNB", icon: "🦊" },
+            { id: "dogwifhat", symbol: "WIF", name: "dogwifhat", chain: "SOL", icon: "🐕" },
+            { id: "grok", symbol: "GROK", name: "Grok", chain: "ETH", icon: "🤖" },
+            { id: "book-of-meme", symbol: "BOME", name: "BOME", chain: "SOL", icon: "📖" }
+        ]
+
+        async function fetchRealPrices() {
+            try {
+                const ids = coins.map(c => c.id).join(',');
+                const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+                const data = await res.json();
+                
+                const container = document.getElementById('priceCards');
+                container.innerHTML = '';
+                
+                coins.forEach(coin => {
+                    const priceData = data[coin.id];
+                    if (!priceData) return;
+                    
+                    const change = priceData.usd_24h_change ? priceData.usd_24h_change.toFixed(2) : 0;
+                    const price = priceData.usd.toLocaleString('en-US', { minimumFractionDigits: priceData.usd < 1 ? 8 : 4 });
+                    
+                    const div = document.createElement('div');
+                    div.className = `bg-white rounded-3xl p-6 card border border-violet-100 flex flex-col`;
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="text-5xl">${coin.icon}</div>
+                                <div>
+                                    <p class="font-bold text-2xl">${coin.symbol}</p>
+                                    <p class="text-xs text-gray-400">${coin.chain}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-3xl font-semibold price-ticker">\[ {price}</p>
+                                <p class="${change > 0 ? 'text-emerald-500' : 'text-rose-500'} font-bold text-sm">
+                                    ${change > 0 ? '▲' : '▼'} ${Math.abs(change)}%
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (e) {
+                console.log("CoinGecko falhou, usando mock...", e);
+                useMockPrices();
             }
         }
-        
-        // ====================== DADOS MOCK ======================
-        let memecoinsData = [
-            { name: "PEPE", chain: "ETH", price: 0.00001234, change: 5.8, icon: "🐸" },
-            { name: "BONK", chain: "SOL", price: 0.00002345, change: -2.4, icon: "🐶" },
-            { name: "FLOKI", chain: "BNB", price: 0.000156, change: 12.9, icon: "🦊" },
-            { name: "HAT", chain: "SOL", price: 0.0045, change: 8.7, icon: "🎩" },
-            { name: "GROK", chain: "ETH", price: 0.000089, change: 3.2, icon: "🤖" },
-            { name: "WIF", chain: "SOL", price: 2.85, change: -1.1, icon: "🐕" }
-        ]
-        
-        const newsData = [
-            {
-                title: "PEPE explode 180% após listagem na Binance",
-                desc: "A memecoin mais icônica da Ethereum continua dominando o mercado de humor.",
-                image: "https://picsum.photos/id/1015/600/340",
-                time: "Há 11 min",
-                category: "Solana"
-            },
-            {
-                title: "Solana bate recorde de 180 milhões de TPS com memecoins",
-                desc: "A rede mais rápida do mundo registra o maior volume de memecoins da história.",
-                image: "https://picsum.photos/id/201/600/340",
-                time: "Há 34 min",
-                category: "Solana"
-            },
-            {
-                title: "BNB Chain libera novo launcher de memecoins sem taxa",
-                desc: "A Binance Smart Chain quer competir diretamente com Solana no hype das memecoins.",
-                image: "https://picsum.photos/id/1005/600/340",
-                time: "Há 1h",
-                category: "BNB"
-            },
-            {
-                title: "Ethereum Dencun upgrade impulsiona memecoins Layer-2",
-                desc: "Preços de tokens como DOGE e SHIB disparam após redução de 90% nas taxas.",
-                image: "https://picsum.photos/id/870/600/340",
-                time: "Há 2h",
-                category: "Ethereum"
-            },
-            {
-                title: "Frog Hat (HAT) alcança $420M de market cap",
-                desc: "A mascote oficial do CoinHat Feeds está virando febre mundial.",
-                image: "https://picsum.photos/id/29/600/340",
-                time: "Há 3h",
-                category: "Memecoins"
-            },
-            {
-                title: "China aprova trading de memecoins pela primeira vez",
-                desc: "Mercado asiático abre as portas para o universo das moedas de memes.",
-                image: "https://picsum.photos/id/133/600/340",
-                time: "Há 4h",
-                category: "Global"
-            }
-        ]
-        
-        // ====================== FUNÇÕES ======================
-        function renderPriceCards() {
-            const container = document.getElementById('priceCards')
-            container.innerHTML = ''
-            
-            memecoinsData.forEach(coin => {
-                const div = document.createElement('div')
-                div.className = `bg-white rounded-3xl p-5 card border border-violet-100 flex flex-col justify-between shadow-xl`
+
+        function useMockPrices() {
+            const container = document.getElementById('priceCards');
+            container.innerHTML = '';
+            coins.forEach(coin => {
+                const price = (Math.random() * 0.01 + 0.0001).toFixed(coin.symbol === "WIF" ? 2 : 8);
+                const change = (Math.random() * 20 - 8).toFixed(1);
+                
+                const div = document.createElement('div');
+                div.className = `bg-white rounded-3xl p-6 card border border-violet-100`;
                 div.innerHTML = `
-                    <div class="flex justify-between">
+                    <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="text-4xl">${coin.icon}</div>
+                            <div class="text-5xl">${coin.icon}</div>
                             <div>
-                                <p class="font-bold text-xl">${coin.name}</p>
+                                <p class="font-bold text-2xl">${coin.symbol}</p>
                                 <p class="text-xs text-gray-400">${coin.chain}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-2xl font-semibold price-ticker">$${coin.price}</p>
-                            <p class="${coin.change > 0 ? 'text-emerald-500' : 'text-rose-500'} text-sm font-bold">
-                                ${coin.change > 0 ? '▲' : '▼'} ${Math.abs(coin.change)}%
+                            <p class="text-3xl font-semibold price-ticker"> \]{price}</p>
+                            <p class="${change > 0 ? 'text-emerald-500' : 'text-rose-500'} font-bold text-sm">
+                                ${change > 0 ? '▲' : '▼'} ${Math.abs(change)}%
                             </p>
                         </div>
                     </div>
-                `
-                container.appendChild(div)
-            })
+                `;
+                container.appendChild(div);
+            });
         }
-        
-        function updatePricesRealTime() {
+
+        // Atualização em tempo real (a cada 15 segundos tenta puxar da API)
+        function startRealTimeUpdate() {
+            fetchRealPrices();
             setInterval(() => {
-                memecoinsData.forEach(coin => {
-                    // Simula variação pequena
-                    const variation = (Math.random() * 0.8 - 0.4)
-                    coin.price = parseFloat((coin.price * (1 + variation / 100)).toFixed(coin.price < 1 ? 8 : 2))
-                    coin.change = parseFloat((coin.change + (Math.random() * 4 - 2)).toFixed(1))
-                })
-                renderPriceCards()
-            }, 2800)
+                fetchRealPrices();
+            }, 15000);
         }
-        
-        function renderNewsCards() {
-            const container = document.getElementById('newsGrid')
-            container.innerHTML = ''
-            
-            newsData.forEach((news, index) => {
-                const cardHTML = `
-                <div class="card bg-white rounded-3xl overflow-hidden shadow-2xl border border-violet-100 group">
-                    <div class="relative">
-                        <img src="\( {news.image}" alt=" \){news.title}" class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500">
-                        <div class="absolute top-4 right-4 bg-white/90 text-violet-700 text-[10px] font-bold px-3 py-1 rounded-3xl shadow">${news.category}</div>
-                    </div>
-                    <div class="p-5">
-                        <div class="text-xs text-gray-400 mb-2">${news.time}</div>
-                        <h3 class="font-semibold text-lg leading-tight mb-3 line-clamp-2">${news.title}</h3>
-                        <p class="text-sm text-gray-600 line-clamp-3">${news.desc}</p>
-                        <button onclick="alert('Abrindo notícia completa... (mock)')" 
-                                class="mt-5 text-violet-600 text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                            Ler notícia completa 
-                            <span class="text-xl leading-none">→</span>
-                        </button>
-                    </div>
-                </div>`
-                container.innerHTML += cardHTML
-            })
+
+        // Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
         }
-        
-        // Gráficos Chart.js
-        function createCharts() {
-            // Solana
-            new Chart(document.getElementById('chartSolana'), {
-                type: 'line',
-                data: {
-                    labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
-                    datasets: [{
-                        label: 'Preço SOL Memecoins',
-                        data: [124, 131, 118, 145, 138, 152],
-                        borderColor: '#22d3ee',
-                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
-                        borderWidth: 4,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { display: false }, x: { grid: { color: '#f1f5f9' } } }
-                }
-            })
-            
-            // BNB
-            new Chart(document.getElementById('chartBNB'), {
-                type: 'line',
-                data: {
-                    labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
-                    datasets: [{
-                        label: 'Preço BNB Memecoins',
-                        data: [78, 82, 91, 85, 79, 88],
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                        borderWidth: 4,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { display: false }, x: { grid: { color: '#f1f5f9' } } }
-                }
-            })
-            
-            // Ethereum
-            new Chart(document.getElementById('chartETH'), {
-                type: 'line',
-                data: {
-                    labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
-                    datasets: [{
-                        label: 'Preço ETH Memecoins',
-                        data: [210, 203, 218, 195, 225, 213],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        borderWidth: 4,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { display: false }, x: { grid: { color: '#f1f5f9' } } }
-                }
-            })
+
+        function selectMenu(el) {
+            document.querySelectorAll('#sidebar a').forEach(a => {
+                a.classList.remove('bg-violet-100', 'text-violet-700');
+            });
+            el.classList.add('bg-violet-100', 'text-violet-700');
+            toggleSidebar();
+            alert('Seção carregada! (em breve com filtro por rede)');
         }
-        
-        function toggleLanguageDropdown() {
-            const dropdown = document.getElementById('langDropdown')
-            dropdown.classList.toggle('hidden')
-        }
-        
-        function changeLanguage(lang) {
-            const flagMap = {
-                en: '🇬🇧',
-                pt: '🇧🇷',
-                zh: '🇨🇳',
-                es: '🇪🇸',
-                ja: '🇯🇵',
-                ru: '🇷🇺'
-            }
-            document.getElementById('currentLang').innerHTML = flagMap[lang]
-            toggleLanguageDropdown()
-            
-            // Mock de troca de idioma
-            const header = document.querySelector('h1')
-            if (lang === 'en') header.textContent = 'CoinHat Feeds'
-            else if (lang === 'pt') header.textContent = 'CoinHat Feeds'
-            alert(`🌍 Idioma alterado para ${lang.toUpperCase()}! (Interface ainda em PT-BR para este demo)`)
-        }
-        
-        function fakeNavClick(el) {
-            document.querySelectorAll('aside a').forEach(a => a.classList.remove('bg-violet-100', 'text-violet-700'))
-            el.classList.add('bg-violet-100', 'text-violet-700')
-            alert('Navegando para seção... (mock)')
-        }
-        
-        function refreshNews() {
-            const grid = document.getElementById('newsGrid')
-            grid.style.opacity = '0.3'
-            setTimeout(() => {
-                // Simula novas notícias
-                newsData.unshift({
-                    title: "Nova memecoin HAT sobe 340% em 1 hora!",
-                    desc: "A mascote do CoinHat Feeds está dominando todas as redes.",
-                    image: "https://picsum.photos/id/1016/600/340",
-                    time: "Agora",
-                    category: "Hot"
-                })
-                renderNewsCards()
-                grid.style.opacity = '1'
-            }, 800)
-        }
-        
-        // ====================== INICIALIZAÇÃO ======================
-        window.onload = function() {
-            // Tailwind
-            const config = initializeTailwind()
-            document.documentElement.setAttribute('data-tailwind-config', JSON.stringify(config))
-            
-            // Renderiza tudo
-            renderPriceCards()
-            renderNewsCards()
-            createCharts()
-            updatePricesRealTime()
-            
-            // Busca com sugestões
-            const searchInput = document.getElementById('searchInput')
-            const suggestionsBox = document.getElementById('searchSuggestions')
-            
-            searchInput.addEventListener('focus', () => {
-                suggestionsBox.classList.remove('hidden')
-                suggestionsBox.innerHTML = `
-                    <div class="px-6 py-3 hover:bg-violet-50 cursor-pointer" onclick="alert('Buscando contrato...')">0xA1b2c3... (PEPE)</div>
-                    <div class="px-6 py-3 hover:bg-violet-50 cursor-pointer" onclick="alert('Buscando contrato...')">Ca7x9k2... (BONK na Solana)</div>
-                    <div class="px-6 py-3 hover:bg-violet-50 cursor-pointer" onclick="alert('Buscando contrato...')">0xFrogHat... (HAT)</div>
-                `
-            })
-            
-            document.addEventListener('click', (e) => {
-                if (!searchInput.contains(e.target)) suggestionsBox.classList.add('hidden')
-            })
-            
-            console.log('%c✅ CoinHat Feeds HTML carregado com sucesso! Logo, busca, notícias, memecoins em tempo real e gráficos prontos.', 'color:#7c3aed; font-size:13px; font-weight:700')
-        }
-    </script>
-</body>
-</html>
+
+        // Multi-idioma (mock)
+        function toggle
