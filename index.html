@@ -8,25 +8,102 @@ function toggleMenu(){
 }
 window.toggleMenu = toggleMenu;
 
-// ================= LANG =================
+// ================= LANG BOX =================
 function toggleLang(){
  let b=document.getElementById("langBox");
  b.style.display = b.style.display==="block"?"none":"block";
 }
 window.toggleLang = toggleLang;
 
-const t={
- pt:{title:"🚀 Memecoins em Alta",news:"📰 Notícias"},
- en:{title:"🚀 Trending Memecoins",news:"📰 News"},
- es:{title:"🚀 Memecoins",news:"📰 Noticias"},
- zh:{title:"🚀 热门迷因币",news:"📰 新闻"},
- ja:{title:"🚀 ミームコイン",news:"📰 ニュース"},
- ar:{title:"🚀 ميمكوين",news:"📰 أخبار"}
+// ================= TRADUÇÕES COMPLETAS =================
+const translations = {
+
+ pt:{
+  title:"🚀 Memecoins em Alta",
+  news:"📰 Notícias",
+  search:"Buscar contrato...",
+  newsList:[
+   "📰 Bitcoin dispara com adoção institucional",
+   "📰 Ethereum reduz taxas e atrai usuários",
+   "📰 Memecoins da Solana voltam a crescer"
+  ]
+ },
+
+ en:{
+  title:"🚀 Trending Memecoins",
+  news:"📰 News",
+  search:"Search contract...",
+  newsList:[
+   "📰 Bitcoin surges with institutional adoption",
+   "📰 Ethereum reduces fees and gains users",
+   "📰 Solana memecoins are pumping again"
+  ]
+ },
+
+ es:{
+  title:"🚀 Memecoins en tendencia",
+  news:"📰 Noticias",
+  search:"Buscar contrato...",
+  newsList:[
+   "📰 Bitcoin sube con adopción institucional",
+   "📰 Ethereum reduce tarifas",
+   "📰 Memecoins vuelven a subir"
+  ]
+ },
+
+ zh:{
+  title:"🚀 热门迷因币",
+  news:"📰 新闻",
+  search:"搜索合约...",
+  newsList:[
+   "📰 比特币上涨",
+   "📰 以太坊降低费用",
+   "📰 迷因币再次上涨"
+  ]
+ },
+
+ ja:{
+  title:"🚀 ミームコイン",
+  news:"📰 ニュース",
+  search:"コントラクト検索...",
+  newsList:[
+   "📰 ビットコイン上昇",
+   "📰 イーサリアム手数料低下",
+   "📰 ミームコイン上昇"
+  ]
+ },
+
+ ar:{
+  title:"🚀 ميمكوين",
+  news:"📰 أخبار",
+  search:"بحث العقد...",
+  newsList:[
+   "📰 ارتفاع بيتكوين",
+   "📰 انخفاض رسوم إيثريوم",
+   "📰 عودة الميمكوين"
+  ]
+ }
+
 };
 
-function setLang(l){
- document.getElementById("title").innerText = t[l].title;
- document.getElementById("newsTitle").innerText = t[l].news;
+// ================= APLICAR IDIOMA =================
+function setLang(lang){
+
+ const t = translations[lang];
+
+ document.getElementById("title").innerText = t.title;
+ document.getElementById("newsTitle").innerText = t.news;
+ document.getElementById("search").placeholder = t.search;
+
+ // atualizar notícias
+ const newsCards = document.querySelectorAll(".news-card");
+
+ newsCards.forEach((card, i)=>{
+  if(t.newsList[i]){
+   card.innerText = t.newsList[i];
+  }
+ });
+
  document.getElementById("langBox").style.display = "none";
 }
 window.setLang = setLang;
@@ -57,11 +134,12 @@ searchInput.addEventListener("keydown", async (e)=>{
     <h3>${p.baseToken.symbol}</h3>
     <p>$${p.priceUsd || "?"}</p>
     <p>${p.baseToken.name}</p>
-   </div>`;
+   </div>
+  `;
  });
 });
 
-// ================= MEMES =================
+// ================= MEMECOINS =================
 async function loadMemes(){
 
  const box=document.getElementById("memes");
@@ -120,6 +198,7 @@ function draw(id,data){
 }
 
 // INIT
+setLang("pt"); // idioma inicial
 loadMemes();
 
 });
