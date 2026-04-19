@@ -1,174 +1,159 @@
-<script>
+<!DOCTYPE html><html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoinHatFeeds</title><style>
+body{margin:0;font-family:Arial;background:#f5f7ff}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#fff;border-bottom:1px solid #ddd}
+.logo{font-weight:bold}
+.icon-btn{cursor:pointer}
+
+.search-wrap{position:relative}
+#search-results{display:none;position:absolute;background:#fff;border:1px solid #ddd;width:100%;max-height:200px;overflow:auto}
+
+.meme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:15px}
+.meme-card{background:#fff;padding:10px;border-radius:10px;cursor:pointer;transition:.2s}
+.meme-card:hover{transform:translateY(-3px)}
+.meme-card:active{transform:scale(0.97)}
+
+.ticker-bar{background:#111;color:#fff;padding:5px;overflow:hidden}
+.ticker-inner{white-space:nowrap;animation:move 20s linear infinite}
+@keyframes move{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.lang-menu{display:none;position:absolute;background:#fff;border:1px solid #ddd}
+.lang-menu.active{display:block}
+.lang-opt{padding:8px;cursor:pointer}
+.lang-opt.selected{background:#eee}
+
+</style></head><body><header>
+  <div class="logo">CoinHatFeeds</div>  <div class="search-wrap">
+    <input id="searchInput" placeholder="Buscar token...">
+    <div id="search-results"></div>
+  </div>  <div class="lang-dropdown">
+    <button onclick="toggleLang()">🌐</button><!-- ✅ CORRIGIDO -->
+<div class="lang-menu" id="langMenu">
+  <div class="lang-opt selected" onclick="setLang('pt', this)">🇧🇷 Português</div>
+  <div class="lang-opt" onclick="setLang('en', this)">🇺🇸 English</div>
+  <div class="lang-opt" onclick="setLang('es', this)">🇪🇸 Español</div>
+</div>
+
+  </div>
+</header><div class="ticker-bar">
+  <div class="ticker-inner" id="tickerInner">Carregando...</div>
+</div><main>
+  <h2 id="nt-title">Memecoins</h2>
+  <div class="meme-grid" id="memeGrid"></div>
+</main><script>
 
 // helper
 const el = id => document.getElementById(id);
 
-// ================= LANG =================
-let lang = 'pt';
+// idioma
+const i18n={
+ pt:{title:'Memecoins'},
+ en:{title:'Memecoins'},
+ es:{title:'Memecoins'}
+};
 
-function setLang(l, btn){
-  lang = l;
-  const t = i18n[l];
+function setLang(l,btn){
+ el('nt-title').textContent=i18n[l].title;
 
-  el('nt-title').textContent = t.title;
-  el('nt-sub').innerHTML = t.sub + ' · <span class="live"><span class="live-dot"></span>LIVE</span>';
-  el('nt-news').textContent = t.news;
-  el('nt-refresh').textContent = t.refresh;
-  el('nt-vol').textContent = t.vol;
-  el('nt-liq').textContent = t.liq;
-  el('nt-mc').textContent = t.mc;
-  el('nt-contract').textContent = t.contract;
-  el('searchInput').placeholder = t.search;
+ document.querySelectorAll('.lang-opt').forEach(e=>e.classList.remove('selected'));
+ btn.classList.add('selected');
 
-  document.querySelectorAll('.lang-opt').forEach(e => e.classList.remove('selected'));
-  if(btn) btn.classList.add('selected');
-
-  toggleLang();
+ toggleLang();
 }
 
 function toggleLang(){
-  el('langMenu').classList.toggle('active');
+ el('langMenu').classList.toggle('active');
 }
 
-// ================= CACHE =================
-let cache = { data:null, time:0 };
+// cache
+let cache={data:null,time:0};
 
-// ================= FETCH LIMIT =================
-async function fetchWithLimit(arr, limit=4){
-  const results = [];
-  const executing = [];
+// limitar requisições
+async function fetchWithLimit(arr,limit=4){
+ const results=[],executing=[];
+ for(const item of arr){
+  const p=fetch(`https://api.dexscreener.com/latest/dex/tokens/${item.tokenAddress}`)
+  .then(r=>r.json())
+  .then(d=>d.pairs?.[0]||null)
+  .catch(()=>null);
 
-  for(const item of arr){
-    const p = fetch(`https://api.dexscreener.com/latest/dex/tokens/${item.tokenAddress}`)
-      .then(r=>r.json())
-      .then(d=>d.pairs?.[0] || null)
-      .catch(()=>null);
+  results.push(p);
 
-    results.push(p);
-
-    if(limit <= arr.length){
-      const e = p.then(()=>executing.splice(executing.indexOf(e),1));
-      executing.push(e);
-      if(executing.length >= limit){
-        await Promise.race(executing);
-      }
-    }
+  if(limit<=arr.length){
+   const e=p.then(()=>executing.splice(executing.indexOf(e),1));
+   executing.push(e);
+   if(executing.length>=limit) await Promise.race(executing);
   }
-
-  return Promise.all(results);
+ }
+ return Promise.all(results);
 }
 
-// ================= LOAD =================
-let memeData = [];
-
+// carregar
 async function loadMemecoins(){
-  const now = Date.now();
+ const now=Date.now();
 
-  // cache 20s
-  if(cache.data && now - cache.time < 20000){
-    renderMemes(cache.data);
-    renderTicker(cache.data);
-    return;
-  }
+ if(cache.data && now-cache.time<20000){
+  render(cache.data);
+  return;
+ }
 
-  try{
-    const res = await fetch('https://api.dexscreener.com/token-boosts/top/v1');
-    const data = await res.json();
+ try{
+  const res=await fetch('https://api.dexscreener.com/token-boosts/top/v1');
+  const data=await res.json();
 
-    const items = data.slice(0,12);
-    const details = await fetchWithLimit(items, 4);
+  const items=data.slice(0,10);
+  const details=await fetchWithLimit(items,4);
 
-    memeData = details.filter(Boolean);
+  const clean=details.filter(Boolean);
 
-    cache = { data:memeData, time:now };
+  cache={data:clean,time:now};
 
-    renderMemes(memeData);
-    renderTicker(memeData);
+  render(clean);
 
-  }catch(e){
-    console.error(e);
-    el('memeGrid').innerHTML = '<p style="padding:20px;color:#888">Erro ao carregar</p>';
-  }
+ }catch(e){
+  console.log(e);
+ }
 }
 
-// ================= RENDER =================
-function renderMemes(pairs){
-  const grid = el('memeGrid');
-  grid.innerHTML = '';
+// render
+function render(pairs){
+ const grid=el('memeGrid');
+ grid.innerHTML='';
 
-  pairs.forEach((pair,i)=>{
-    const name = pair.baseToken?.name || '—';
-    const sym = pair.baseToken?.symbol || '—';
-    const price = parseFloat(pair.priceUsd) || 0;
-    const chg = pair.priceChange?.h24 || 0;
-    const pos = chg >= 0;
+ pairs.forEach(p=>{
+  const price=parseFloat(p.priceUsd)||0;
+  const chg=p.priceChange?.h24||0;
+  const pos=chg>=0;
 
-    const card = document.createElement('div');
-    card.className = 'meme-card';
+  const card=document.createElement('div');
+  card.className='meme-card';
 
-    card.innerHTML = `
-      <div class="meme-top">
-        <img class="meme-logo" src="${pair.info?.imageUrl||''}">
-        <div>
-          <div class="meme-name">${name}</div>
-          <div class="meme-sym">${sym}</div>
-        </div>
-      </div>
+  card.innerHTML=`
+    <b>${p.baseToken?.symbol}</b><br>
+    $${price.toFixed(6)}<br>
+    <span style="color:${pos?'green':'red'}">${chg.toFixed(2)}%</span>
+  `;
 
-      <div>
-        <span class="meme-price">$${price.toFixed(6)}</span>
-        <span class="meme-chg ${pos?'pos':'neg'}">${chg.toFixed(2)}%</span>
-      </div>
-    `;
+  card.onclick=()=>{
+    card.style.opacity="0.6";
+    alert(p.baseToken?.name);
+  };
 
-    // UX MELHOR
-    card.onclick = ()=>{
-      card.style.opacity = "0.6";
-      openModal(pair);
-    };
+  grid.appendChild(card);
+ });
 
-    grid.appendChild(card);
-  });
+ el('tickerInner').innerHTML=[...pairs,...pairs].map(p=>{
+  const chg=p.priceChange?.h24||0;
+  return `${p.baseToken?.symbol} $${parseFloat(p.priceUsd).toFixed(4)} (${chg.toFixed(2)}%)`;
+ }).join(' • ');
 }
 
-// ================= TICKER =================
-function renderTicker(pairs){
-  const inner = el('tickerInner');
-
-  inner.innerHTML = [...pairs,...pairs].map(p=>{
-    const chg = p.priceChange?.h24 || 0;
-    const pos = chg >= 0;
-
-    return `
-      <span class="ticker-item">
-        ${p.baseToken?.symbol}
-        $${parseFloat(p.priceUsd).toFixed(4)}
-        <span class="${pos?'ticker-chg pos':'ticker-chg neg'}">
-          ${chg.toFixed(2)}%
-        </span>
-      </span>
-    `;
-  }).join('');
-}
-
-// ================= NEWS =================
-function openNews(){
-  el('newsPanel').classList.add('open');
-  el('overlay').classList.add('active');
-}
-
-function closeNews(){
-  el('newsPanel').classList.remove('open');
-  el('overlay').classList.remove('active');
-}
-
-// ================= SECURITY FIX =================
-function openLink(url){
-  window.open(url, '_blank', 'noopener,noreferrer');
-}
-
-// ================= INIT =================
+// init
 loadMemecoins();
-setInterval(loadMemecoins, 30000);
+setInterval(loadMemecoins,30000);
 
-</script>
+</script></body>
+</html>
