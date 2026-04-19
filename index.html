@@ -1,159 +1,153 @@
-<!DOCTYPE html><html lang="pt">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CoinHatFeeds</title><style>
-body{margin:0;font-family:Arial;background:#f5f7ff}
-header{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#fff;border-bottom:1px solid #ddd}
-.logo{font-weight:bold}
-.icon-btn{cursor:pointer}
+<style>
 
-.search-wrap{position:relative}
-#search-results{display:none;position:absolute;background:#fff;border:1px solid #ddd;width:100%;max-height:200px;overflow:auto}
-
-.meme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:15px}
-.meme-card{background:#fff;padding:10px;border-radius:10px;cursor:pointer;transition:.2s}
-.meme-card:hover{transform:translateY(-3px)}
-.meme-card:active{transform:scale(0.97)}
-
-.ticker-bar{background:#111;color:#fff;padding:5px;overflow:hidden}
-.ticker-inner{white-space:nowrap;animation:move 20s linear infinite}
-@keyframes move{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-.lang-menu{display:none;position:absolute;background:#fff;border:1px solid #ddd}
-.lang-menu.active{display:block}
-.lang-opt{padding:8px;cursor:pointer}
-.lang-opt.selected{background:#eee}
-
-</style></head><body><header>
-  <div class="logo">CoinHatFeeds</div>  <div class="search-wrap">
-    <input id="searchInput" placeholder="Buscar token...">
-    <div id="search-results"></div>
-  </div>  <div class="lang-dropdown">
-    <button onclick="toggleLang()">🌐</button><!-- ✅ CORRIGIDO -->
-<div class="lang-menu" id="langMenu">
-  <div class="lang-opt selected" onclick="setLang('pt', this)">🇧🇷 Português</div>
-  <div class="lang-opt" onclick="setLang('en', this)">🇺🇸 English</div>
-  <div class="lang-opt" onclick="setLang('es', this)">🇪🇸 Español</div>
-</div>
-
-  </div>
-</header><div class="ticker-bar">
-  <div class="ticker-inner" id="tickerInner">Carregando...</div>
-</div><main>
-  <h2 id="nt-title">Memecoins</h2>
-  <div class="meme-grid" id="memeGrid"></div>
-</main><script>
-
-// helper
-const el = id => document.getElementById(id);
-
-// idioma
-const i18n={
- pt:{title:'Memecoins'},
- en:{title:'Memecoins'},
- es:{title:'Memecoins'}
-};
-
-function setLang(l,btn){
- el('nt-title').textContent=i18n[l].title;
-
- document.querySelectorAll('.lang-opt').forEach(e=>e.classList.remove('selected'));
- btn.classList.add('selected');
-
- toggleLang();
+:root{
+  --bg:#f4f7ff;
+  --card:#ffffff;
+  --blue:#1a6bff;
+  --green:#00e676;
+  --text:#0d1b3e;
+  --muted:#6b7fa8;
 }
 
-function toggleLang(){
- el('langMenu').classList.toggle('active');
+/* BASE */
+body{
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background:linear-gradient(180deg,#eef3ff,#f8fbff);
+  color:var(--text);
 }
 
-// cache
-let cache={data:null,time:0};
-
-// limitar requisições
-async function fetchWithLimit(arr,limit=4){
- const results=[],executing=[];
- for(const item of arr){
-  const p=fetch(`https://api.dexscreener.com/latest/dex/tokens/${item.tokenAddress}`)
-  .then(r=>r.json())
-  .then(d=>d.pairs?.[0]||null)
-  .catch(()=>null);
-
-  results.push(p);
-
-  if(limit<=arr.length){
-   const e=p.then(()=>executing.splice(executing.indexOf(e),1));
-   executing.push(e);
-   if(executing.length>=limit) await Promise.race(executing);
-  }
- }
- return Promise.all(results);
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 16px;
+  background:white;
+  border-radius:0 0 20px 20px;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);
 }
 
-// carregar
-async function loadMemecoins(){
- const now=Date.now();
-
- if(cache.data && now-cache.time<20000){
-  render(cache.data);
-  return;
- }
-
- try{
-  const res=await fetch('https://api.dexscreener.com/token-boosts/top/v1');
-  const data=await res.json();
-
-  const items=data.slice(0,10);
-  const details=await fetchWithLimit(items,4);
-
-  const clean=details.filter(Boolean);
-
-  cache={data:clean,time:now};
-
-  render(clean);
-
- }catch(e){
-  console.log(e);
- }
+.logo{
+  font-weight:800;
+  font-size:1.2rem;
+  background:linear-gradient(135deg,var(--blue),var(--green));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 
-// render
-function render(pairs){
- const grid=el('memeGrid');
- grid.innerHTML='';
-
- pairs.forEach(p=>{
-  const price=parseFloat(p.priceUsd)||0;
-  const chg=p.priceChange?.h24||0;
-  const pos=chg>=0;
-
-  const card=document.createElement('div');
-  card.className='meme-card';
-
-  card.innerHTML=`
-    <b>${p.baseToken?.symbol}</b><br>
-    $${price.toFixed(6)}<br>
-    <span style="color:${pos?'green':'red'}">${chg.toFixed(2)}%</span>
-  `;
-
-  card.onclick=()=>{
-    card.style.opacity="0.6";
-    alert(p.baseToken?.name);
-  };
-
-  grid.appendChild(card);
- });
-
- el('tickerInner').innerHTML=[...pairs,...pairs].map(p=>{
-  const chg=p.priceChange?.h24||0;
-  return `${p.baseToken?.symbol} $${parseFloat(p.priceUsd).toFixed(4)} (${chg.toFixed(2)}%)`;
- }).join(' • ');
+/* SEARCH */
+.search-wrap input{
+  border:none;
+  padding:10px 14px;
+  border-radius:50px;
+  background:#eef3ff;
+  outline:none;
 }
 
-// init
-loadMemecoins();
-setInterval(loadMemecoins,30000);
+/* GRID */
+.meme-grid{
+  padding:16px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:14px;
+}
 
-</script></body>
-</html>
+/* CARD ESTILO APP */
+.meme-card{
+  background:var(--card);
+  border-radius:20px;
+  padding:14px;
+  box-shadow:0 6px 20px rgba(26,107,255,.08);
+  transition:.2s;
+  position:relative;
+  overflow:hidden;
+}
+
+.meme-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(26,107,255,.05),rgba(0,230,118,.05));
+  opacity:0;
+  transition:.2s;
+}
+
+.meme-card:hover{
+  transform:translateY(-4px);
+}
+
+.meme-card:hover::before{
+  opacity:1;
+}
+
+.meme-card:active{
+  transform:scale(0.96);
+}
+
+/* TEXTO */
+.meme-price{
+  font-weight:800;
+  font-size:1.1rem;
+}
+
+.pos{color:var(--green);}
+.neg{color:#ff3d71;}
+
+/* TICKER */
+.ticker-bar{
+  margin:10px;
+  border-radius:50px;
+  background:linear-gradient(90deg,var(--blue),#0040cc);
+  color:white;
+  padding:6px 12px;
+  overflow:hidden;
+}
+
+.ticker-inner{
+  white-space:nowrap;
+  animation:move 25s linear infinite;
+}
+
+@keyframes move{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+
+/* MODAL BONITO */
+#modal{
+  backdrop-filter:blur(6px);
+}
+
+#modal > div{
+  border-radius:24px;
+  box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+
+/* BOTÕES */
+button{
+  border:none;
+  border-radius:50px;
+  padding:10px 16px;
+  background:linear-gradient(135deg,var(--blue),var(--green));
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* LANG */
+.lang-menu{
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.lang-opt:hover{
+  background:#eef3ff;
+}
+
+.lang-opt.selected{
+  background:var(--blue);
+  color:white;
+}
+
+</style>
