@@ -603,14 +603,177 @@ document.addEventListener('click',e=>{
 });
 
 /* ── NEWS (AI-powered live feed) ── */
+<script>
+/* ── i18n COMPLETO (página + chatbot) ── */
+const i18n={
+  pt:{
+    title:'Memecoins em Destaque',sub:'Cotações e gráficos em tempo real',
+    news:'📰 Crypto News',refresh:'Atualizar',vol:'Vol 24h',liq:'Liquidez',
+    mc:'Mkt Cap',contract:'Contrato',search:'Buscar token...',
+    chartBtn:'Ver Gráfico Avançado',chartTitle:'Gráfico ao vivo',
+    botName:'CryptoBot',botSub:'Assistente CoinHatFeeds · online',
+    botHello:'👋 Olá! Sou o CryptoBot. Pergunte qualquer coisa sobre cripto!',
+    botPh:'Pergunte sobre cripto...',
+    sugs:['O que é memecoin?','Como comprar cripto?','Bitcoin hoje','O que é liquidez?'],
+    kb:[
+      {k:['memecoin','meme','pump.fun','pumpfun'],r:'Memecoins são criptomoedas baseadas em memes e cultura da internet, como PEPE, DOGE e tokens do Pump.fun. São altamente voláteis. Alto risco, mas podem ter retornos expressivos.'},
+      {k:['comprar','buy','como comprar'],r:'Para comprar cripto use exchanges como Binance, Coinbase ou Kraken. Para memecoins novas na Solana, use Phantom wallet e troque via Jupiter ou Raydium.'},
+      {k:['bitcoin','btc'],r:'Bitcoin (BTC) é a primeira criptomoeda, criada em 2009 por Satoshi Nakamoto. Limite de 21 milhões de moedas. É a maior cripto por capitalização de mercado.'},
+      {k:['ethereum','eth'],r:'Ethereum (ETH) é blockchain programável para contratos inteligentes e dApps. Base do DeFi e NFTs.'},
+      {k:['solana','sol'],r:'Solana (SOL) é blockchain rápida e barata, popular para memecoins via Pump.fun e NFTs.'},
+      {k:['liquidez','liquidity'],r:'Liquidez é a facilidade de comprar/vender sem impactar o preço. Alta liquidez = menos risco de slippage.'},
+      {k:['carteira','wallet','phantom','metamask'],r:'Carteiras cripto guardam suas chaves privadas. Use Phantom para Solana e MetaMask para Ethereum. Nunca compartilhe sua seed phrase!'},
+      {k:['risco','perigo'],r:'Memecoins são altíssimo risco. Invista só o que pode perder e faça sua pesquisa (DYOR) antes de comprar qualquer token.'},
+      {k:['boost','destaque'],r:'Tokens com boost são projetos que pagaram para aparecer em destaque. Podem ser novos lançamentos promissores, mas pesquise sempre antes de investir.'},
+      {k:['olá','oi','ola','hey','hello'],r:'Olá! 👋 Pode perguntar sobre Bitcoin, memecoins, carteiras, como comprar e muito mais!'},
+    ],
+    def:'Boa pergunta! Posso ajudar com Bitcoin, Ethereum, Solana, memecoins, carteiras e como comprar cripto. Tente ser mais específico! 🚀'
+  },
+  en:{
+    title:'Top Memecoins',sub:'Real-time prices and charts',
+    news:'📰 Crypto News',refresh:'Refresh',vol:'Vol 24h',liq:'Liquidity',
+    mc:'Mkt Cap',contract:'Contract',search:'Search token...',
+    chartBtn:'View Advanced Chart',chartTitle:'Live Chart',
+    botName:'CryptoBot',botSub:'CoinHatFeeds Assistant · online',
+    botHello:"👋 Hi! I'm CryptoBot. Ask me anything about crypto!",
+    botPh:'Ask about crypto...',
+    sugs:['What is a memecoin?','How to buy crypto?','Bitcoin today','What is liquidity?'],
+    kb:[
+      {k:['memecoin','meme','pump.fun','pumpfun'],r:'Memecoins are cryptocurrencies based on internet memes like PEPE, DOGE and Pump.fun tokens. Highly volatile, high risk but potentially high reward.'},
+      {k:['buy','purchase','how to buy'],r:'To buy crypto use exchanges like Binance, Coinbase or Kraken. For new Solana memecoins, use Phantom wallet and swap via Jupiter or Raydium.'},
+      {k:['bitcoin','btc'],r:'Bitcoin (BTC) is the first cryptocurrency, created in 2009 by Satoshi Nakamoto. 21 million coin limit. Largest crypto by market cap.'},
+      {k:['ethereum','eth'],r:'Ethereum (ETH) is a programmable blockchain for smart contracts and dApps. Foundation of DeFi and NFTs.'},
+      {k:['solana','sol'],r:'Solana (SOL) is a fast, low-fee blockchain popular for memecoins via Pump.fun and NFTs.'},
+      {k:['liquidity'],r:'Liquidity is how easily you can buy/sell without affecting the price. High liquidity = less slippage risk.'},
+      {k:['wallet','phantom','metamask'],r:'Crypto wallets store your private keys. Use Phantom for Solana, MetaMask for Ethereum. Never share your seed phrase!'},
+      {k:['risk','danger'],r:'Memecoins are extremely high risk. Only invest what you can afford to lose and do your own research (DYOR).'},
+      {k:['boost'],r:'Boosted tokens are projects that paid to be featured. They may be promising new launches, but always research before investing.'},
+      {k:['hello','hi','hey'],r:'Hello! 👋 Ask me about Bitcoin, memecoins, wallets, how to buy and more!'},
+    ],
+    def:'Great question! I can help with Bitcoin, Ethereum, Solana, memecoins, wallets and how to buy crypto. Try to be more specific! 🚀'
+  },
+  es:{
+    title:'Memecoins Destacadas',sub:'Precios y gráficos en tiempo real',
+    news:'📰 Noticias Crypto',refresh:'Actualizar',vol:'Vol 24h',liq:'Liquidez',
+    mc:'Cap Mkt',contract:'Contrato',search:'Buscar token...',
+    chartBtn:'Ver Gráfico Avanzado',chartTitle:'Gráfico en vivo',
+    botName:'CryptoBot',botSub:'Asistente CoinHatFeeds · en línea',
+    botHello:'👋 ¡Hola! Soy CryptoBot. ¡Pregúntame sobre cripto!',
+    botPh:'Pregunta sobre cripto...',
+    sugs:['¿Qué es memecoin?','¿Cómo comprar cripto?','Bitcoin hoy','¿Qué es liquidez?'],
+    kb:[
+      {k:['memecoin','meme'],r:'Las memecoins son criptomonedas basadas en memes como PEPE, DOGE y tokens de Pump.fun. Muy volátiles y de alto riesgo.'},
+      {k:['comprar'],r:'Para comprar usa Binance, Coinbase o Kraken. Para memecoins nuevas en Solana, usa Phantom y cambia via Jupiter.'},
+      {k:['bitcoin','btc'],r:'Bitcoin (BTC) es la primera criptomoneda, creada en 2009 por Satoshi Nakamoto. Límite de 21 millones de monedas.'},
+      {k:['solana','sol'],r:'Solana (SOL) es una blockchain rápida y barata, popular para memecoins via Pump.fun.'},
+      {k:['hola','hey'],r:'¡Hola! 👋 Pregúntame sobre Bitcoin, memecoins, carteras y más!'},
+    ],
+    def:'¡Buena pregunta! Puedo ayudarte con Bitcoin, Solana, memecoins y cómo comprar cripto. ¡Sé más específico! 🚀'
+  },
+  zh:{
+    title:'热门Meme币',sub:'实时价格与图表',
+    news:'📰 加密新闻',refresh:'刷新',vol:'24h 交易量',liq:'流动性',
+    mc:'市值',contract:'合约',search:'搜索代币...',
+    chartBtn:'查看高级图表',chartTitle:'实时图表',
+    botName:'加密机器人',botSub:'CoinHatFeeds 助手 · 在线',
+    botHello:'👋 你好！我是加密机器人。有关加密货币的问题尽管问！',
+    botPh:'询问加密货币...',
+    sugs:['什么是Meme币？','如何购买加密货币？','比特币今天','什么是流动性？'],
+    kb:[
+      {k:['meme','模因'],r:'Meme币是基于网络梗图的加密货币，如PEPE、DOGE和Pump.fun上的代币。波动性极高。'},
+      {k:['购买','买'],r:'购买加密货币可使用Binance、Coinbase或Kraken。新Solana Meme币请使用Phantom钱包通过Jupiter兑换。'},
+      {k:['比特币','bitcoin','btc'],r:'比特币(BTC)是2009年由中本聪创建的首个加密货币，总量限制为2100万枚。'},
+      {k:['你好','嗨'],r:'你好！👋 可以问我关于比特币、Meme币、钱包和如何购买的问题！'},
+    ],
+    def:'好问题！我可以帮助解答比特币、Meme币和如何购买加密货币的问题。请更具体！🚀'
+  },
+  ja:{
+    title:'ミームコイン',sub:'リアルタイム価格・チャート',
+    news:'📰 暗号ニュース',refresh:'更新',vol:'出来高24h',liq:'流動性',
+    mc:'時価総額',contract:'コントラクト',search:'トークン検索...',
+    chartBtn:'詳細チャートを見る',chartTitle:'ライブチャート',
+    botName:'クリプトボット',botSub:'CoinHatFeeds アシスタント · オンライン',
+    botHello:'👋 こんにちは！クリプトボットです。暗号通貨について何でも聞いてください！',
+    botPh:'暗号通貨について質問...',
+    sugs:['ミームコインとは？','暗号通貨の買い方','ビットコイン今日','流動性とは？'],
+    kb:[
+      {k:['ミームコイン','meme'],r:'ミームコインはPEPE、DOGEやPump.funのトークンなど、インターネットミームに基づく暗号通貨です。非常に変動が激しいです。'},
+      {k:['ビットコイン','bitcoin','btc'],r:'ビットコイン(BTC)は2009年にサトシ・ナカモトが作った世界初の暗号通貨で、発行上限は2100万枚です。'},
+      {k:['こんにちは','hello'],r:'こんにちは！👋 ビットコイン、ミームコイン、ウォレットについて質問してください！'},
+    ],
+    def:'良い質問です！ビットコイン、ミームコイン、ウォレットについてお手伝いできます。もっと具体的に！🚀'
+  },
+  ru:{
+    title:'Топ Мемкоины',sub:'Цены и графики в реальном времени',
+    news:'📰 Крипто Новости',refresh:'Обновить',vol:'Обём 24ч',liq:'Ликвидность',
+    mc:'Кап',contract:'Контракт',search:'Поиск токена...',
+    chartBtn:'Расширенный график',chartTitle:'График в реальном времени',
+    botName:'КриптоБот',botSub:'Ассистент CoinHatFeeds · онлайн',
+    botHello:'👋 Привет! Я КриптоБот. Спрашивай всё о крипте!',
+    botPh:'Спроси о крипте...',
+    sugs:['Что такое мемкоин?','Как купить крипту?','Биткоин сегодня','Что такое ликвидность?'],
+    kb:[
+      {k:['мемкоин','meme'],r:'Мемкоины — криптовалюты на основе мемов, как PEPE, DOGE и токены Pump.fun. Очень волатильны и рискованны.'},
+      {k:['купить'],r:'Для покупки используй Binance, Coinbase или Kraken. Для новых токенов Solana — кошелёк Phantom и обмен через Jupiter.'},
+      {k:['биткоин','bitcoin','btc'],r:'Биткоин (BTC) — первая криптовалюта мира, создана в 2009 году. Лимит 21 млн монет.'},
+      {k:['привет','hello'],r:'Привет! 👋 Спрашивай о биткоине, мемкоинах, кошельках и как купить крипту!'},
+    ],
+    def:'Хороший вопрос! Могу помочь с биткоином, мемкоинами и как купить крипту. Попробуй уточнить! 🚀'
+  }
+};
+
+let lang='pt';
+function setLang(l,el){
+  lang=l;const t=i18n[l];
+  const titleEl=document.getElementById('nt-title');
+  const img=titleEl.querySelector('img');
+  titleEl.innerHTML='';
+  if(img)titleEl.appendChild(img);
+  titleEl.appendChild(document.createTextNode(' '+t.title));
+  document.getElementById('nt-sub').innerHTML=t.sub+' · <span class="live"><span class="live-dot"></span>LIVE</span>';
+  document.getElementById('nt-news').textContent=t.news;
+  document.getElementById('nt-refresh').textContent=t.refresh;
+  document.getElementById('nt-vol').textContent=t.vol;
+  document.getElementById('nt-liq').textContent=t.liq;
+  document.getElementById('nt-mc').textContent=t.mc;
+  document.getElementById('nt-contract').textContent=t.contract;
+  document.getElementById('searchInput').placeholder=t.search;
+  document.getElementById('dexBtnLabel').textContent=t.chartBtn;
+  document.getElementById('botName').textContent=t.botName;
+  document.getElementById('botSub').textContent=t.botSub;
+  document.getElementById('chatInput').placeholder=t.botPh;
+  const sugsEl=document.getElementById('chatSugs');sugsEl.innerHTML='';
+  t.sugs.forEach(s=>{
+    const b=document.createElement('button');b.className='chat-sug';b.textContent=s;
+    b.onclick=()=>sendSug(b);sugsEl.appendChild(b);
+  });
+  document.querySelectorAll('.lang-opt').forEach(o=>o.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  document.getElementById('langMenu').classList.remove('active');
+}
+function toggleLang(){document.getElementById('langMenu').classList.toggle('active');}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.lang-dropdown'))document.getElementById('langMenu').classList.remove('active');
+  if(!e.target.closest('.search-wrap'))document.getElementById('search-results').classList.remove('active');
+});
+
+/* ── NEWS (RSS + Twitter/X API via backend proxy) ── */
 let liveNews=[];
 let newsFetched=false;
 
 const NEWS_SOURCE_COLORS={
-  'CoinDesk':'#1a6bff','CoinTelegraph':'#00b85c','Decrypt':'#9945FF',
-  'The Block':'#e65100','Blockworks':'#7c3aed','Reuters':'#cc0000',
-  'Bloomberg':'#0046db','Forbes':'#0046db','default':'#1a6bff'
+  'CoinDesk':'#1a6bff',
+  'CoinTelegraph':'#00b85c',
+  'Decrypt':'#9945FF',
+  'The Block':'#e65100',
+  'Blockworks':'#7c3aed',
+  'Reuters':'#cc0000',
+  'Bloomberg':'#0046db',
+  'Forbes':'#0046db',
+  'Twitter/X':'#111827',
+  'default':'#1a6bff'
 };
+
 const NEWS_IMAGES=[
   'https://images.unsplash.com/photo-1605792657660-596af9009e82?w=400&q=80',
   'https://images.unsplash.com/photo-1642104704074-907c0698b98d?w=400&q=80',
@@ -622,13 +785,63 @@ const NEWS_IMAGES=[
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
 ];
 
+const NEWS_CONFIG={
+  rssFeeds:[
+    {url:'https://www.coindesk.com/arc/outboundfeeds/rss/',source:'CoinDesk',topic:'mercado'},
+    {url:'https://cointelegraph.com/rss',source:'CoinTelegraph',topic:'geral'},
+    {url:'https://decrypt.co/feed',source:'Decrypt',topic:'geral'},
+    {url:'https://blockworks.co/feed',source:'Blockworks',topic:'geral'}
+  ],
+  twitterProxy:'/api/twitter-news',
+  twitterTopics:[
+    {
+      topic:'memecoins',
+      query:'(memecoin OR memecoins OR "pump.fun" OR $WIF OR $BONK OR $PEPE) -is:retweet lang:en'
+    },
+    {
+      topic:'solana',
+      query:'(solana OR $SOL OR @solana) -is:retweet lang:en'
+    },
+    {
+      topic:'bitcoin',
+      query:'(bitcoin OR $BTC OR "bitcoin etf") -is:retweet lang:en'
+    }
+  ],
+  maxRssPerFeed:4,
+  maxTwitterPerTopic:4,
+  maxCombined:12
+};
+
 function getNewsImg(idx){return NEWS_IMAGES[idx%NEWS_IMAGES.length];}
+
 function getSourceColor(src){
   for(const k of Object.keys(NEWS_SOURCE_COLORS)){
-    if(src&&src.toLowerCase().includes(k.toLowerCase()))return NEWS_SOURCE_COLORS[k];
+    if(src&&src.toLowerCase().includes(k.toLowerCase())) return NEWS_SOURCE_COLORS[k];
   }
   return NEWS_SOURCE_COLORS.default;
 }
+
+function escapeHtml(str=''){
+  return String(str).replace(/[&<>"']/g,m=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#039;'
+  }[m]));
+}
+
+function stripHtml(html=''){
+  const div=document.createElement('div');
+  div.innerHTML=html;
+  return (div.textContent||div.innerText||'').replace(/\s+/g,' ').trim();
+}
+
+function truncate(str='',max=140){
+  const s=String(str).trim();
+  return s.length>max ? s.slice(0,max-1)+'…' : s;
+}
+
 function timeAgo(iso){
   try{
     const diff=Date.now()-new Date(iso).getTime();
@@ -641,73 +854,160 @@ function timeAgo(iso){
   }catch{return'recente';}
 }
 
-async function fetchLiveNews(){
-  const body=document.getElementById('newsBody');
-  const btn=document.getElementById('newsRefreshBtn');
-  const ts=document.getElementById('newsTimestamp');
-  btn.textContent='⏳ Buscando...';
-  btn.disabled=true;
+async function fetchJSON(url,timeout=8000){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),timeout);
+  try{
+    const res=await fetch(url,{signal:ctrl.signal,cache:'no-store'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }finally{
+    clearTimeout(t);
+  }
+}
 
-  // Show skeletons
-  body.innerHTML=`
+async function fetchRssFeed(feed){
+  try{
+    const rssUrl=`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=${NEWS_CONFIG.maxRssPerFeed}`;
+    const data=await fetchJSON(rssUrl,8000);
+    return (data.items||[]).slice(0,NEWS_CONFIG.maxRssPerFeed).map(item=>({
+      title:truncate(stripHtml(item.title||''),120),
+      source:feed.source,
+      summary:truncate(stripHtml(item.description||item.content||item.contentSnippet||''),180),
+      url:item.link||'#',
+      publishedAt:item.pubDate?new Date(item.pubDate).toISOString():'',
+      topic:feed.topic,
+      origin:'rss'
+    }));
+  }catch{
+    return [];
+  }
+}
+
+async function fetchTwitterTopic(cfg){
+  try{
+    const url=`${NEWS_CONFIG.twitterProxy}?topic=${encodeURIComponent(cfg.topic)}&q=${encodeURIComponent(cfg.query)}&limit=${NEWS_CONFIG.maxTwitterPerTopic}`;
+    const data=await fetchJSON(url,8000);
+    return (Array.isArray(data)?data:[]).slice(0,NEWS_CONFIG.maxTwitterPerTopic).map(item=>({
+      title:truncate(stripHtml(item.title||item.summary||''),120),
+      source:item.source||`Twitter/X · ${cfg.topic}`,
+      summary:truncate(stripHtml(item.summary||item.title||''),180),
+      url:item.url||'https://x.com',
+      publishedAt:item.publishedAt||'',
+      topic:cfg.topic,
+      origin:'twitter'
+    }));
+  }catch{
+    return [];
+  }
+}
+
+function dedupeNews(items=[]){
+  const map=new Map();
+  items.forEach(item=>{
+    const key=((item.url||'')+'|'+(item.title||'')).toLowerCase().trim();
+    if(!key) return;
+    if(!map.has(key)) map.set(key,item);
+  });
+  return [...map.values()];
+}
+
+function sortNews(items=[]){
+  return items.sort((a,b)=>{
+    const da=a.publishedAt?new Date(a.publishedAt).getTime():0;
+    const db=b.publishedAt?new Date(b.publishedAt).getTime():0;
+    return db-da;
+  });
+}
+
+function fallbackNews(){
+  const now=Date.now();
+  return [
+    {
+      title:'Bitcoin mantém fluxo institucional e segue no radar do mercado',
+      source:'CoinDesk',
+      summary:'Movimento de grandes players mantém o BTC entre os principais destaques do dia.',
+      url:'https://www.coindesk.com/',
+      publishedAt:new Date(now-60*60*1000).toISOString(),
+      topic:'bitcoin',
+      origin:'fallback'
+    },
+    {
+      title:'Solana segue forte com atividade elevada em DEXs e memecoins',
+      source:'Decrypt',
+      summary:'O ecossistema Solana continua puxando volume com novos tokens e atividade on-chain.',
+      url:'https://decrypt.co/',
+      publishedAt:new Date(now-2*60*60*1000).toISOString(),
+      topic:'solana',
+      origin:'fallback'
+    },
+    {
+      title:'Memecoins voltam ao centro das atenções com novos lançamentos',
+      source:'CoinTelegraph',
+      summary:'Tokens ligados à cultura meme e Pump.fun seguem entre os assuntos mais comentados.',
+      url:'https://cointelegraph.com/',
+      publishedAt:new Date(now-3*60*60*1000).toISOString(),
+      topic:'memecoins',
+      origin:'fallback'
+    },
+    {
+      title:'Mercado cripto acompanha Bitcoin, Solana e narrativas de risco',
+      source:'Blockworks',
+      summary:'Traders monitoram rotação entre majors e memecoins em busca de momentum de curto prazo.',
+      url:'https://blockworks.co/',
+      publishedAt:new Date(now-4*60*60*1000).toISOString(),
+      topic:'mercado',
+      origin:'fallback'
+    }
+  ];
+}
+
+function newsSkeleton(){
+  return `
     <div id="newsLoading">
       <div class="news-skeleton"><div class="sk sk-img"></div><div style="padding:12px 14px"><div class="sk sk-line short" style="margin:0 0 8px"></div><div class="sk sk-line" style="margin:0 0 6px"></div><div class="sk sk-line" style="margin:0;width:40%"></div></div></div>
       <div class="news-skeleton" style="margin-top:14px"><div class="sk sk-img"></div><div style="padding:12px 14px"><div class="sk sk-line short" style="margin:0 0 8px"></div><div class="sk sk-line" style="margin:0 0 6px"></div><div class="sk sk-line" style="margin:0;width:40%"></div></div></div>
       <div class="news-skeleton" style="margin-top:14px"><div class="sk sk-img"></div><div style="padding:12px 14px"><div class="sk sk-line short" style="margin:0 0 8px"></div><div class="sk sk-line" style="margin:0 0 6px"></div><div class="sk sk-line" style="margin:0;width:40%"></div></div></div>
     </div>`;
+}
 
-  const today=new Date().toISOString().slice(0,10);
-  const prompt=`Today is ${today}. Search the web for the 8 most recent and important cryptocurrency news headlines from today or the last 48 hours. Include breaking news about Bitcoin, Ethereum, Solana, memecoins, DeFi, regulation, ETFs, and major market moves.
+async function fetchLiveNews(){
+  const body=document.getElementById('newsBody');
+  const btn=document.getElementById('newsRefreshBtn');
+  const ts=document.getElementById('newsTimestamp');
 
-Return ONLY a valid JSON array (no markdown, no explanation, no code blocks) with exactly this structure:
-[
-  {
-    "title": "Full headline here",
-    "source": "Source name (e.g. CoinDesk, Reuters, CoinTelegraph)",
-    "summary": "One sentence summary of the news",
-    "url": "https://source-url.com/article",
-    "publishedAt": "ISO 8601 datetime or empty string"
-  }
-]
-
-Return only the JSON array, nothing else.`;
+  btn.innerHTML='⏳ Buscando...';
+  btn.disabled=true;
+  body.innerHTML=newsSkeleton();
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
-        tools:[{type:'web_search_20250305',name:'web_search'}],
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data=await res.json();
-    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    let cleaned=text.replace(/```json|```/g,'').trim();
-    const arrStart=cleaned.indexOf('[');
-    const arrEnd=cleaned.lastIndexOf(']');
-    if(arrStart>-1&&arrEnd>arrStart)cleaned=cleaned.slice(arrStart,arrEnd+1);
-    const articles=JSON.parse(cleaned);
-    liveNews=articles;
+    const [rssResults,twitterResults]=await Promise.all([
+      Promise.all(NEWS_CONFIG.rssFeeds.map(fetchRssFeed)),
+      Promise.all(NEWS_CONFIG.twitterTopics.map(fetchTwitterTopic))
+    ]);
+
+    const combined=sortNews(
+      dedupeNews([
+        ...rssResults.flat(),
+        ...twitterResults.flat()
+      ])
+    ).slice(0,NEWS_CONFIG.maxCombined);
+
+    if(!combined.length) throw new Error('sem notícias');
+
+    liveNews=combined;
     newsFetched=true;
-    renderNews(articles);
+    renderNews(combined);
+
     const now=new Date();
     ts.textContent=`Atualizado: ${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   }catch(e){
-    // On error show fallback static news
-    const fallbackNews=[
-      {title:'Bitcoin mantém força acima de $90K com demanda institucional crescente',source:'CoinDesk',summary:'Grandes fundos continuam acumulando BTC apesar da volatilidade do mercado.',url:'https://coindesk.com',publishedAt:new Date(Date.now()-7200000).toISOString()},
-      {title:'Solana registra volume recorde em DEXs impulsionado por memecoins',source:'Decrypt',summary:'O ecossistema Solana bate novo recorde de volume em exchanges descentralizadas.',url:'https://decrypt.co',publishedAt:new Date(Date.now()-14400000).toISOString()},
-      {title:'SEC avança em aprovação de novos ETFs de criptomoedas',source:'CoinTelegraph',summary:'Regulador americano sinaliza abertura para novos produtos de investimento em cripto.',url:'https://cointelegraph.com',publishedAt:new Date(Date.now()-21600000).toISOString()},
-      {title:'Ethereum developers anunciam próxima atualização da rede',source:'The Block',summary:'Nova atualização promete melhorar escalabilidade e reduzir taxas de gas.',url:'https://theblock.co',publishedAt:new Date(Date.now()-28800000).toISOString()},
-    ];
-    liveNews=fallbackNews;
-    renderNews(fallbackNews);
-    ts.textContent='Sem conexão — exibindo últimas notícias salvas';
+    liveNews=fallbackNews();
+    newsFetched=true;
+    renderNews(liveNews);
+    ts.textContent='Sem conexão completa — exibindo últimas notícias disponíveis';
   }finally{
-    btn.textContent='↻ Atualizar';
+    btn.innerHTML='↻ Atualizar';
     btn.disabled=false;
   }
 }
@@ -715,33 +1015,313 @@ Return only the JSON array, nothing else.`;
 function openNews(){
   document.getElementById('newsPanel').classList.add('open');
   document.getElementById('overlay').classList.add('active');
-  if(!newsFetched)fetchLiveNews();
+  if(!newsFetched) fetchLiveNews();
   else renderNews(liveNews);
 }
-function closeNews(){document.getElementById('newsPanel').classList.remove('open');document.getElementById('overlay').classList.remove('active');}
+
+function closeNews(){
+  document.getElementById('newsPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('active');
+}
+
 function renderNews(articles){
   const body=document.getElementById('newsBody');
   body.innerHTML='';
+
   if(!articles||!articles.length){
     body.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);font-size:0.88rem;">Nenhuma notícia encontrada.</div>';
     return;
   }
+
   articles.forEach((n,idx)=>{
-    const c=document.createElement('div');c.className='news-card';
+    const c=document.createElement('div');
+    c.className='news-card';
     const color=getSourceColor(n.source);
     const ago=n.publishedAt?timeAgo(n.publishedAt):'recente';
     const img=getNewsImg(idx);
+    const topicLabel=(n.topic||'geral').toUpperCase();
+
     c.onclick=()=>window.open(n.url||'https://coindesk.com','_blank');
-    c.innerHTML=`<img class="news-img" src="${img}" alt="" onerror="this.style.background='#e8f0ff'"/>
-    <div class="news-info">
-      <div class="news-source" style="color:${color}">${n.source||'Crypto News'}</div>
-      <div class="news-title">${n.title}</div>
-      ${n.summary?`<div style="font-size:0.76rem;color:var(--muted);margin:4px 0 2px;line-height:1.35;">${n.summary}</div>`:''}
-      <div class="news-date">🕐 ${ago}</div>
-    </div>`;
+
+    c.innerHTML=`
+      <img class="news-img" src="${img}" alt="" onerror="this.style.background='#e8f0ff'"/>
+      <div class="news-info">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+          <div class="news-source" style="color:${color}">${escapeHtml(n.source||'Crypto News')}</div>
+          <div style="font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:999px;background:#eef3ff;color:#315efb;letter-spacing:.03em;">
+            ${escapeHtml(topicLabel)}
+          </div>
+        </div>
+        <div class="news-title">${escapeHtml(n.title||'Sem título')}</div>
+        ${n.summary?`<div style="font-size:0.76rem;color:var(--muted);margin:4px 0 2px;line-height:1.35;">${escapeHtml(n.summary)}</div>`:''}
+        <div class="news-date">🕐 ${escapeHtml(ago)}</div>
+      </div>`;
     body.appendChild(c);
   });
 }
+
+/* ── UTILS ── */
+function fmt(n){
+  if(!n||isNaN(n))return'—';
+  if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return'$'+(n/1e3).toFixed(2)+'K';
+  if(n>=1)return'$'+n.toFixed(4);
+  return'$'+n.toPrecision(4);
+}
+function fmtChg(c){if(c==null)return'';return(c>=0?'+':'')+c.toFixed(2)+'%';}
+
+/* ── CHARTS (timeframe-aware) ── */
+let currentPair=null,currentTf='m5';
+function miniChart(svgEl,pos,tf){
+  const count=tf==='m5'?30:tf==='h1'?40:20;
+  const volatility=tf==='m5'?8:tf==='h1'?18:30;
+  const pts=Array.from({length:count},(_,i)=>{
+    const trend=(pos?1:-1)*i*0.5;
+    return{x:i,y:50+trend+(Math.random()-0.48)*volatility};
+  });
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const minY=Math.min(...ys),maxY=Math.max(...ys);
+  const W=300,H=100;
+  const toX=x=>(x/(count-1))*W;
+  const toY=y=>H-((y-minY)/(maxY-minY||1))*(H-10)-5;
+  const d='M '+pts.map(p=>`${toX(p.x)},${toY(p.y)}`).join(' L ');
+  const col=pos?'#00b85c':'#ff3d71';
+  const gid='g'+Math.random().toString(36).slice(2);
+  svgEl.innerHTML=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${col}" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="${d} L ${W},${H} L 0,${H} Z" fill="url(#${gid})"/>
+  <path d="${d}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+}
+function switchTab(btn,tf){
+  document.querySelectorAll('.chart-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTf=tf;
+  if(currentPair){
+    const chg=currentPair.priceChange?.h24;
+    setTimeout(()=>miniChart(document.getElementById('m-chart'),chg>=0,tf),0);
+  }
+}
+
+/* ── CHART FULLSCREEN ── */
+function openChartScreen(){
+  if(!currentPair)return;
+  const addr=currentPair.baseToken?.address||'';
+  const chain=currentPair.chainId||'solana';
+  const name=currentPair.baseToken?.name||'Chart';
+  document.getElementById('chartScreenTitle').textContent=name;
+  document.getElementById('chartScreenFrame').src=
+    `https://dexscreener.com/${chain}/${addr}?embed=1&theme=light&trades=0&info=0`;
+  const s=document.getElementById('chartScreen');
+  s.style.display='flex';
+  s.style.animation='slideInUp 0.25s ease';
+}
+function closeChartScreen(){
+  document.getElementById('chartScreen').style.display='none';
+  document.getElementById('chartScreenFrame').src='';
+}
+(function(){
+  let startY=0;
+  document.getElementById('chartScreen').addEventListener('touchstart',e=>{startY=e.touches[0].clientY;},{passive:true});
+  document.getElementById('chartScreen').addEventListener('touchend',e=>{
+    if(e.changedTouches[0].clientY-startY>80)closeChartScreen();
+  },{passive:true});
+})();
+
+/* ── FALLBACK — novos lançamentos reais ── */
+const FALLBACK=[
+  {baseToken:{name:'Fartcoin',symbol:'FARTCOIN',address:'9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump'},priceUsd:'0.74',priceChange:{h24:21.4},volume:{h24:520000000},liquidity:{usd:48000000},fdv:740000000,chainId:'solana',pairAddress:'fartcoin1',info:{imageUrl:'https://assets.coingecko.com/coins/images/51185/large/fartcoin.jpg',socials:[{type:'twitter',url:'https://twitter.com/fartcoin_sol'},{type:'telegram',url:'https://t.me/fartcoin_sol'}],websites:[{url:'https://fartcoin.lol'}]}},
+  {baseToken:{name:'Pudgy Penguins',symbol:'PENGU',address:'2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv'},priceUsd:'0.031',priceChange:{h24:14.2},volume:{h24:410000000},liquidity:{usd:62000000},fdv:3100000000,chainId:'solana',pairAddress:'pengu1',info:{imageUrl:'https://assets.coingecko.com/coins/images/35965/large/pengu.png',socials:[{type:'twitter',url:'https://twitter.com/pudgypenguins'},{type:'telegram',url:'https://t.me/pudgypenguins'}],websites:[{url:'https://pudgypenguins.com'}]}},
+  {baseToken:{name:'Official Trump',symbol:'TRUMP',address:'6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN'},priceUsd:'8.74',priceChange:{h24:6.8},volume:{h24:380000000},liquidity:{usd:95000000},fdv:8740000000,chainId:'solana',pairAddress:'trump1',info:{imageUrl:'https://assets.coingecko.com/coins/images/52421/large/trump.png',socials:[{type:'twitter',url:'https://twitter.com/gettrumpcoins'},{type:'telegram',url:'https://t.me/officialtrumpcoin'}],websites:[{url:'https://gettrumpmemes.com'}]}},
+  {baseToken:{name:'Peanut the Squirrel',symbol:'PNUT',address:'2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump'},priceUsd:'0.312',priceChange:{h24:9.5},volume:{h24:290000000},liquidity:{usd:35000000},fdv:312000000,chainId:'solana',pairAddress:'pnut1',info:{imageUrl:'https://assets.coingecko.com/coins/images/51999/large/pnut.png',socials:[{type:'twitter',url:'https://twitter.com/pnutsolana'},{type:'telegram',url:'https://t.me/pnutsolana'}],websites:[{url:'https://pnut.lol'}]}},
+  {baseToken:{name:'Chillguy',symbol:'CHILLGUY',address:'Df6yfrKC8kZE3KNkrHERkzABjanjZRoxylCS1twTtR57'},priceUsd:'0.184',priceChange:{h24:18.7},volume:{h24:245000000},liquidity:{usd:28000000},fdv:184000000,chainId:'solana',pairAddress:'chillguy1',info:{imageUrl:'https://assets.coingecko.com/coins/images/51699/large/chillguy.jpg',socials:[{type:'twitter',url:'https://twitter.com/chillguycoin'},{type:'telegram',url:'https://t.me/chillguycoin'}],websites:[{url:'https://chillguy.lol'}]}},
+  {baseToken:{name:'Cat in a Dogs World',symbol:'MEW',address:'MEW1gQWJ3nEXg2qgERiKu7FAFj79PHvQVREQUzScPP5'},priceUsd:'0.0089',priceChange:{h24:11.3},volume:{h24:198000000},liquidity:{usd:22000000},fdv:890000000,chainId:'solana',pairAddress:'mew1',info:{imageUrl:'https://assets.coingecko.com/coins/images/36440/large/mew.png',socials:[{type:'twitter',url:'https://twitter.com/mew_sol'},{type:'telegram',url:'https://t.me/mewsolana'}],websites:[{url:'https://mew.gg'}]}},
+  {baseToken:{name:'Goatseus Maximus',symbol:'GOAT',address:'CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump'},priceUsd:'0.248',priceChange:{h24:-4.2},volume:{h24:165000000},liquidity:{usd:19000000},fdv:248000000,chainId:'solana',pairAddress:'goat1',info:{imageUrl:'https://assets.coingecko.com/coins/images/51839/large/goat.png',socials:[{type:'twitter',url:'https://twitter.com/goatsolana'},{type:'telegram',url:'https://t.me/goatsolana'}],websites:[{url:'https://goatsolana.com'}]}},
+  {baseToken:{name:'Book of Meme',symbol:'BOME',address:'ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82'},priceUsd:'0.0068',priceChange:{h24:7.9},volume:{h24:142000000},liquidity:{usd:16000000},fdv:680000000,chainId:'solana',pairAddress:'bome1',info:{imageUrl:'https://assets.coingecko.com/coins/images/36217/large/bome.png',socials:[{type:'twitter',url:'https://twitter.com/bookofmeme'},{type:'telegram',url:'https://t.me/bookofmeme'}],websites:[{url:'https://bookofmeme.com'}]}},
+  {baseToken:{name:'Pippin',symbol:'PIPPIN',address:'Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump'},priceUsd:'0.092',priceChange:{h24:34.6},volume:{h24:118000000},liquidity:{usd:12000000},fdv:92000000,chainId:'solana',pairAddress:'pippin1',info:{imageUrl:'https://assets.coingecko.com/coins/images/52018/large/pippin.jpg',socials:[{type:'twitter',url:'https://twitter.com/pippinsolana'},{type:'telegram',url:'https://t.me/pippinsolana'}],websites:[{url:'https://pippin.fun'}]}},
+  {baseToken:{name:'Ai16z',symbol:'AI16Z',address:'HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC'},priceUsd:'0.412',priceChange:{h24:15.8},volume:{h24:98000000},liquidity:{usd:14000000},fdv:412000000,chainId:'solana',pairAddress:'ai16z1',info:{imageUrl:'https://assets.coingecko.com/coins/images/51784/large/ai16z.jpg',socials:[{type:'twitter',url:'https://twitter.com/ai16zdao'},{type:'telegram',url:'https://t.me/ai16z'}],websites:[{url:'https://ai16z.vc'}]}},
+  {baseToken:{name:'dogwifhat',symbol:'WIF',address:'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm'},priceUsd:'1.24',priceChange:{h24:5.3},volume:{h24:285000000},liquidity:{usd:22000000},fdv:1240000000,chainId:'solana',pairAddress:'wif1',info:{imageUrl:'https://assets.coingecko.com/coins/images/33566/large/dogwifhat.jpg',socials:[{type:'twitter',url:'https://twitter.com/dogwifcoin'},{type:'telegram',url:'https://t.me/dogwifhatcoin'}],websites:[{url:'https://dogwifcoin.org'}]}},
+  {baseToken:{name:'Bonk',symbol:'BONK',address:'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'},priceUsd:'0.0000062',priceChange:{h24:3.1},volume:{h24:210000000},liquidity:{usd:18000000},fdv:620000000,chainId:'solana',pairAddress:'bonk1',info:{imageUrl:'https://assets.coingecko.com/coins/images/28600/large/bonk.jpg',socials:[{type:'twitter',url:'https://twitter.com/bonk_inu'},{type:'telegram',url:'https://t.me/bonk_inu_sol'}],websites:[{url:'https://bonkcoin.com'}]}}
+];
+
+let memeData=[];
+let loadingLive=false;
+
+async function loadMemecoins(){
+  if(!memeData.length){ memeData=FALLBACK; renderMemes(memeData); renderTicker(memeData); }
+  if(loadingLive) return;
+  loadingLive=true;
+
+  try{
+    const ctrl=new AbortController();
+    setTimeout(()=>ctrl.abort(),8000);
+    const res=await fetch('https://api.dexscreener.com/token-boosts/latest/v1',{signal:ctrl.signal});
+    if(!res.ok) throw new Error('boost fail');
+    const boosts=await res.json();
+    const list=(Array.isArray(boosts)?boosts:boosts.data||[]).slice(0,20);
+    if(!list.length) throw new Error('empty boosts');
+
+    const details=await Promise.all(list.map(async item=>{
+      if(!item.tokenAddress) return null;
+      try{
+        const c2=new AbortController();
+        setTimeout(()=>c2.abort(),5000);
+        const r=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${item.tokenAddress}`,{signal:c2.signal});
+        const d=await r.json();
+        const pairs=(d.pairs||[]).filter(p=>p.priceUsd&&parseFloat(p.priceUsd)>0);
+        if(!pairs.length) return null;
+        pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0));
+        const p=pairs[0];
+        if(item.icon&&!p.info?.imageUrl){
+          p.info=p.info||{};
+          p.info.imageUrl=item.icon;
+        }
+        if(item.links&&(!p.info?.socials||!p.info.socials.length)){
+          p.info=p.info||{};
+          p.info.socials=(item.links||[]).map(l=>({type:l.type||l.label?.toLowerCase(),url:l.url}));
+          p.info.websites=(item.links||[]).filter(l=>l.type==='website'||l.label==='Website').map(l=>({url:l.url}));
+        }
+        return p;
+      }catch{return null;}
+    }));
+
+    const live=details.filter(p=>p&&p.priceUsd&&p.baseToken);
+    if(live.length>=3){
+      memeData=live;
+      renderMemes(memeData);
+      renderTicker(memeData);
+    }
+  }catch(e){
+    console.log('API indisponível, usando fallback');
+  }finally{
+    loadingLive=false;
+  }
+}
+function renderMemes(pairs){
+  const grid=document.getElementById('memeGrid');grid.innerHTML='';
+  pairs.forEach((pair,i)=>{
+    const name=pair.baseToken?.name||'—',sym=pair.baseToken?.symbol||'—';
+    const price=parseFloat(pair.priceUsd)||0,chg=pair.priceChange?.h24,pos=chg>=0;
+    const card=document.createElement('div');card.className='meme-card';
+    const bl=i<2?'badge-hot':i<6?'badge-new':'';
+    const bl2=i<2?'🚀 Boost':i<6?'🆕 New':'';
+    card.innerHTML=`
+      <div class="meme-top">
+        <img class="meme-logo" src="${pair.info?.imageUrl||''}" onerror="this.style.background='var(--blue-light)';this.src=''" alt=""/>
+        <div><div class="meme-name">${name.length>14?name.slice(0,13)+'…':name}</div><div class="meme-sym">${sym}</div></div>
+        ${bl2?`<span class="meme-badge ${bl}">${bl2}</span>`:''}
+      </div>
+      <div><span class="meme-price">${fmt(price)}</span><span class="meme-chg ${pos?'pos':'neg'}">${fmtChg(chg)}</span></div>
+      <div class="meme-stats">
+        <div>Vol 24h<span>${fmt(pair.volume?.h24)}</span></div>
+        <div>Liq<span>${fmt(pair.liquidity?.usd)}</span></div>
+        <div>MktCap<span>${fmt(pair.fdv)}</span></div>
+      </div>
+      <div class="meme-chart"><svg viewBox="0 0 300 52" preserveAspectRatio="none" id="chart-${i}"></svg></div>`;
+    card.onclick=()=>openModal(pair);
+    grid.appendChild(card);
+    setTimeout(()=>miniChart(document.getElementById(`chart-${i}`),pos,'h1'),60*i);
+  });
+}
+function renderTicker(pairs){
+  const inner=document.getElementById('tickerInner');
+  inner.innerHTML=[...pairs,...pairs].map(p=>{
+    const chg=p.priceChange?.h24,pos=chg>=0;
+    return`<span class="ticker-item">${p.baseToken?.symbol||'?'} ${fmt(parseFloat(p.priceUsd))} <span class="ticker-chg ${pos?'pos':'neg'}">${fmtChg(chg)}</span></span>`;
+  }).join('');
+}
+
+/* ── MODAL ── */
+function openModal(pair){
+  currentPair=pair;
+  currentTf='m5';
+
+  document.querySelectorAll('.chart-tab').forEach((b,i)=>b.classList.toggle('active',i===0));
+
+  const name=pair.baseToken?.name||'—';
+  const sym=pair.baseToken?.symbol||'—';
+  const price=parseFloat(pair.priceUsd)||0;
+  const chg=pair.priceChange?.h24;
+  const pos=(chg||0)>=0;
+
+  document.getElementById('m-logo').src=pair.info?.imageUrl||'';
+  document.getElementById('m-name').textContent=name;
+  document.getElementById('m-sym').textContent=sym+' · '+(pair.chainId||'');
+  document.getElementById('m-price').textContent=fmt(price);
+  const ce=document.getElementById('m-chg');
+  ce.textContent=fmtChg(chg);
+  ce.className='meme-chg '+(pos?'pos':'neg');
+
+  document.getElementById('m-vol').textContent=fmt(pair.volume?.h24);
+  document.getElementById('m-liq').textContent=fmt(pair.liquidity?.usd);
+  document.getElementById('m-mc').textContent=fmt(pair.fdv);
+
+  document.getElementById('m-addr').textContent=pair.baseToken?.address||'—';
+
+  setTimeout(()=>miniChart(document.getElementById('m-chart'),pos,currentTf),50);
+
+  const t=i18n[lang]||i18n.pt;
+  document.getElementById('dexBtnLabel').textContent=t.chartBtn;
+
+  const links=document.getElementById('m-links');
+  links.innerHTML='';
+  const addL=(cls,icon,label,url)=>{
+    if(!url)return;
+    const a=document.createElement('a');
+    a.href=url;a.target='_blank';a.rel='noopener';
+    a.className='modal-link '+cls;
+    a.innerHTML=icon+' '+label;
+    links.appendChild(a);
+  };
+  const socials=pair.info?.socials||[];
+  const websites=pair.info?.websites||[];
+  const tw=socials.find(s=>s.type==='twitter'||s.label==='Twitter');
+  const tg=socials.find(s=>s.type==='telegram'||s.label==='Telegram');
+  const web=websites[0]||socials.find(s=>s.type==='website'||s.label==='Website');
+  addL('tw','🐦','Twitter',tw?.url);
+  addL('tg','✈️','Telegram',tg?.url);
+  addL('web','🌐','Website',web?.url);
+
+  document.getElementById('tokenModal').classList.add('active');
+}
+function closeModal(){
+  document.getElementById('tokenModal').classList.remove('active');
+  currentPair=null;
+}
+document.getElementById('tokenModal').onclick=e=>{
+  if(e.target===document.getElementById('tokenModal'))closeModal();
+};
+
+/* ── SEARCH ── */
+let sTimeout;
+async function onSearch(q){
+  clearTimeout(sTimeout);
+  if(!q||q.length<2){document.getElementById('search-results').classList.remove('active');return;}
+  sTimeout=setTimeout(async()=>{
+    const box=document.getElementById('search-results');
+    box.innerHTML='<div style="padding:14px;text-align:center"><span class="spinner"></span></div>';
+    box.classList.add('active');
+    try{
+      const res=await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(q)}`);
+      const data=await res.json();
+      const pairs=(data.pairs||[]).slice(0,8);
+      if(!pairs.length){box.innerHTML='<div style="padding:14px;color:var(--muted);font-size:.85rem">Nenhum resultado</div>';return;}
+      window._sp=pairs;
+      box.innerHTML=pairs.map((p,idx)=>{
+        const chg=p.priceChange?.h24,pos=chg>=0;
+        return`<div class="sr-item" onclick="selSearch(${idx})">
+          <img class="sr-logo" src="${p.info?.imageUrl||''}" onerror="this.style.display='none'" alt=""/>
+          <div><div class="sr-name">${p.baseToken?.symbol||'?'}</div><div class="sr-pair">${p.baseToken?.name||''}</div></div>
+          <div style="margin-left:auto;text-align:right"><div class="sr-price">${fmt(parseFloat(p.priceUsd))}</div><div class="sr-chg ${pos?'pos':'neg'}">${fmtChg(chg)}</div></div>
+        </div>`;
+      }).join('');
+    }catch{box.innerHTML='<div style="padding:14px;color:var(--muted);font-size:.85rem">Erro na busca</div>';}
+  },400);
+}
+function selSearch
+
 
 /* ── UTILS ── */
 function fmt(n){
