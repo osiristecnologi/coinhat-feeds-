@@ -1485,7 +1485,24 @@ setInterval(()=>{if(tweetsFetched)fetchTweets(activeFilter);},300000);
 </script>
 
 <style>
+ <style>
 @keyframes slideInUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* FIX MOBILE - COLEI AQUI PRA TU */
+html, body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+* {
+  box-sizing: border-box;
+}
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
 </style>
 <script>
 if('serviceWorker' in navigator){
@@ -1507,3 +1524,5 @@ function _installApp(){if(_dp){_dp.prompt();_dp.userChoice.then(()=>{_dp=null;_h
 </script>
 </body>
 </html>
+                           
+   
