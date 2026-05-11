@@ -435,116 +435,45 @@ main{padding:24px 16px;max-width:1200px;margin:0 auto;}
 ══════════════════════════════════════════ -->
 <div class="tw-panel" id="twPanel">
 
-  <!-- Header -->
-  <div class="tw-header">
-    <div class="tw-header-top">
-      <h2>
-        <svg class="x-logo" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        Cripto no X/Twitter
-      </h2>
-      <div class="tw-header-actions">
-        <button class="tw-refresh-btn" id="twRefreshBtn" onclick="fetchTweets(activeFilter)">↻ Atualizar</button>
-        <button class="tw-close-btn" onclick="closePanels()">✕</button>
-      </div>
-    </div>
-
-    <!-- Filter tabs -->
-    <div class="tw-filters">
-      <button class="tw-filter active" onclick="setFilter(this,'all')" data-f="all">🔥 Tudo</button>
-      <button class="tw-filter" onclick="setFilter(this,'bitcoin')" data-f="bitcoin">₿ Bitcoin</button>
-      <button class="tw-filter" onclick="setFilter(this,'solana')" data-f="solana">◎ Solana</button>
-      <button class="tw-filter" onclick="setFilter(this,'ethereum')" data-f="ethereum">Ξ Ethereum</button>
-      <button class="tw-filter" onclick="setFilter(this,'memecoin')" data-f="memecoin">🐸 Memes</button>
-      <button class="tw-filter" onclick="setFilter(this,'defi')" data-f="defi">⚡ DeFi</button>
-    </div>
-    <div class="tw-timestamp" id="twTimestamp"></div>
-  </div>
-
-  <!-- Trending tags -->
-  <div class="tw-trending">
-    <div class="tw-trending-title">🔥 Trending no X</div>
-    <div class="tw-trending-tags" id="trendingTags">
-      <span class="tw-trending-tag" onclick="setFilterByTag(this,'#Bitcoin')">#Bitcoin</span>
-      <span class="tw-trending-tag" onclick="setFilterByTag(this,'#Solana')">#Solana</span>
-      <span class="tw-trending-tag" onclick="setFilterByTag(this,'#PEPE')">#PEPE</span>
-      <span class="tw-trending-tag" onclick="setFilterByTag(this,'$WIF')">$WIF</span>
-      <span class="tw-trending-tag" onclick="setFilterByTag(this,'#DeFi')">#DeFi</span>
-      <span class="tw-trending-tag" onclick="setFilterByTag(this,'#NFT')">#NFT</span>
-    </div>
-  </div>
-
-  <!-- Tweets body -->
-  <div class="tw-body" id="twBody">
-    <div id="twLoading" style="display:flex;justify-content:center;padding:30px;">
-      <span class="tw-spinner"></span>
-    </div>
-  </div>
-
-  <!-- Stats bar -->
-  <div class="tw-stats-bar" id="twStatsBar">
-    <div class="tw-stat-item"><strong id="statTweets">—</strong>posts</div>
-    <div class="tw-stat-item"><strong id="statLikes">—</strong>likes</div>
-    <div class="tw-stat-item"><strong id="statRetweets">—</strong>RTs</div>
-    <div class="tw-stat-item"><strong id="statSentiment">—</strong>sentimento</div>
-  </div>
-</div>
-
-<!-- NEWS PANEL (mantido intacto) -->
-<div class="news-panel" id="newsPanel">
-  <div class="news-header">
-    <h2 id="nt-news">📰 Crypto News</h2>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="fetchLiveNews()" id="newsRefreshBtn" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:50px;color:white;padding:5px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">↻ Atualizar</button>
-      <button onclick="closePanels()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:32px;height:32px;color:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
-    </div>
-  </div>
-  <div style="padding:8px 16px 0;font-size:0.7rem;color:rgba(255,255,255,0.7);background:linear-gradient(135deg,var(--blue),#0040cc);text-align:right;" id="newsTimestamp"></div>
-  <div class="news-body" id="newsBody">
-    <div id="newsLoading">
-      <div class="news-skeleton"><div class="sk sk-img"></div><div style="padding:12px 14px"><div class="sk sk-line short" style="margin:0 0 8px"></div><div class="sk sk-line" style="margin:0 0 6px"></div><div class="sk sk-line" style="margin:0;width:40%"></div></div></div>
-      <div class="news-skeleton" style="margin-top:14px"><div class="sk sk-img"></div><div style="padding:12px 14px"><div class="sk sk-line short" style="margin:0 0 8px"></div><div class="sk sk-line" style="margin:0 0 6px"></div><div class="sk sk-line" style="margin:0;width:40%"></div></div></div>
-      <div class="news-skeleton" style="margin-top:14px"><div class="sk sk-img"></div><div style="padding:12px 14px"><div class="sk sk-line short" style="margin:0 0 8px"></div><div class="sk sk-line" style="margin:0 0 6px"></div><div class="sk sk-line" style="margin:0;width:40%"></div></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- HEADER -->
+  <!-- HEADER -->
 <header>
   <div class="header-left">
-    <!-- Twitter/X button (NOVO — ícone X) -->
-    <button class="icon-btn" id="twBtn" onclick="openTwitterPanel()" title="X/Twitter Cripto" style="border-color:rgba(29,161,242,0.3);">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#1DA1F2"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      <span class="notif-dot" style="background:#1DA1F2;"></span>
-    </button>
-    <!-- News button (mantido) -->
-    <button class="icon-btn" onclick="openNews()" title="Notícias">
-      📰<span class="notif-dot"></span>
-    </button>
-    <div class="logo">coinhatfeeds</div>
-  </div>
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Buscar token..." autocomplete="off" oninput="onSearch(this.value)" onfocus="showResults()"/>
-    <div id="search-results"></div>
-  </div>
-  <div class="header-right">
-    <div class="lang-dropdown">
-      <button class="icon-btn" onclick="toggleLang()" title="Idioma">🌐</button>
-      <div class="lang-menu" id="langMenu">
-        <div class="lang-opt selected" onclick="setLang('pt',this)">🇧🇷 Português</div>
-        <div class="lang-opt" onclick="setLang('en',this)">🇺🇸 English</div>
-        <div class="lang-opt" onclick="setLang('es',this)">🇪🇸 Español</div>
-        <div class="lang-opt" onclick="setLang('zh',this)">🇨🇳 中文</div>
-        <div class="lang-opt" onclick="setLang('ja',this)">🇯🇵 日本語</div>
-        <div class="lang-opt" onclick="setLang('ru',this)">🇷🇺 Русский</div>
-      </div>
+  <!-- Twitter/X button (NOVO — ícone X) -->
+  <button class="icon-btn" id="twBtn" onclick="openTwitterPanel()" title="X/Twitter Cripto" style="border-color:rgba(29,161,242,0.3);">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#1DA1F2"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    <span class="notif-dot" style="background:#1DA1F2;"></span>
+  </button>
+  <!-- News button (mantido) -->
+  <button class="icon-btn" onclick="openNews()" title="Notícias">
+    📰<span class="notif-dot"></span>
+  </button>
+  <div class="logo">coinhatfeeds</div>
+</div>
+
+<div class="search-wrap" style="display:flex;align-items:center;gap:8px;">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="searchInput" placeholder="Buscar token..." autocomplete="off" oninput="onSearch(this.value)" onfocus="showResults()" style="flex:1;"/>
+  
+  <div class="lang-dropdown">
+    <button class="icon-btn" onclick="toggleLang()" title="Idioma">🌐</button>
+    <div class="lang-menu" id="langMenu">
+      <div class="lang-opt selected" onclick="setLang('pt',this)">🇧🇷 Português</div>
+      <div class="lang-opt" onclick="setLang('en',this)">🇺🇸 English</div>
+      <div class="lang-opt" onclick="setLang('es',this)">🇪🇸 Español</div>
+      <div class="lang-opt" onclick="setLang('zh',this)">🇨🇳 中文</div>
+      <div class="lang-opt" onclick="setLang('ja',this)">🇯🇵 日本語</div>
+      <div class="lang-opt" onclick="setLang('ru',this)">🇷🇺 Русский</div>
     </div>
   </div>
+ 
+   <div id="search-results" style="position:absolute;top:100%;left:0;right:0;z-index:100;"></div>
+</div>
+
+<div class="header-right"></div>
 </header>
 
 <!-- TICKER -->
-<div class="ticker-bar"><div class="ticker-inner" id="tickerInner"><span class="ticker-item">Carregando cotações...</span></div></div>
-
+<div class="ticker-bar"><div class="ticker-content">
 <!-- MAIN -->
 <main>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
